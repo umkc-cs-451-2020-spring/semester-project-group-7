@@ -1,8 +1,8 @@
 # Semester-Project-Group-7
-# CS-451R
+## CS-451R
 
 
-# Our Team:
+## Our Team:
 *Mariam Habib-Project Manager<br/>
 *Scott Howard-Developer<br/>
 *Irem Atik-Developer<br/>
@@ -13,11 +13,11 @@
 
 
 
-# High Level Overview
+## High Level Overview
 >A web application that pulls in transaction details and allows the user to set triggers for notification rules and receive notifications around them.  The system should also save data to a database so recurring reports can be created.
 
 
-# Requirements
+## Requirements
 >1.	Must be a web application (not a desktop application) built in a “newer” web development framework
 >> a.	.Net preferably – if you choose another framework, support from us will be limited
 >2.	Make the application responsive and aesthetically pleasing. Client side framework/libraries are up to you but must be included in project (aka no external resources), but you must use at least one CSS framework such as Bootstrap (unless you want to make all the styles yourself).
@@ -59,7 +59,7 @@
 >10.	Unit testing
 >a.	10% code coverage for unit tests. xUnit is a good framework for .NET.
 
-# Stretch Goals (Two are required)
+## Stretch Goals (Two are required)
 >1.	Deploy the project into a windows server/cloud instance
 >>a.	Practice configuration properties for different environments
 >2.	Create a Web API layer for backend interactions. 
