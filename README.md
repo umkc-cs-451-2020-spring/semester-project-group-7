@@ -2,13 +2,12 @@
 # CS-451R
 
 
-# Our Team:
-
->Mariam Habib- Project Manager
->Scott Howard- Developer
->Irem Atik- Developer
->Grant Jenkins-Developer
->Maryam Albakhiet-Developer
+# Our Team
+*Mariam Habib-Project Manager<br/>
+*Scott Howard-Developer<br/>
+*Irem Atik-Developer<br/>
+*Grant Jenkins-Developer<br/>
+*Maryam Albakhiet-Developer<br/>
 
 
 
