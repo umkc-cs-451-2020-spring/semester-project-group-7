@@ -2,7 +2,7 @@
 # CS-451R
 
 
-# Our Team
+# Our Team:
 *Mariam Habib-Project Manager<br/>
 *Scott Howard-Developer<br/>
 *Irem Atik-Developer<br/>
