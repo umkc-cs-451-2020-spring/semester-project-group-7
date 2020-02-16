@@ -1,4 +1,4 @@
-# semester-project-group-7
+# Semester-Project-Group-7
 # CS-451R
 
 
