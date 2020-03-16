@@ -1,0 +1,51 @@
+body {
+    margin-left: 3%;
+    color: #A9A9A9;
+    background-image: url(https://www.commercebank.com/-/media/cb/images/headers/large-header/business/business---graphic---4.jpg);
+    background-size: cover;
+    background-position: center;
+
+
+}
+
+html {
+    height :100%;
+}
+
+.container {
+    font-family: raleway, serif;
+    font-size: 25px;
+    letter-spacing: 5px;
+    padding-top: 4%;
+    text-align: center;
+    color: #F1f1f1;
+    text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
+    0px 8px 13px rgba(0,0,0,0.1),
+    0px 18px 23px rgba(0,0,0,0.1);
+}
+
+.line {
+    width:200px;
+    border-top: 1px solid 	#B8B8B8;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+
+}
+#heading {
+    padding-bottom: 10%;
+}
+.navbar-header {
+    font-family: Acme;
+    font-size: 55px;
+    letter-spacing: 5px;
+    font-weight:500;
+}
+.collapse {
+    font-family: Oswald;
+    font-size: 15px;
+    letter-spacing: 5px;
+    font-weight:500;
+}
+
+.font {
+    width:500px;
+}
