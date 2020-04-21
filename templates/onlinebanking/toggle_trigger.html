@@ -1,0 +1,15 @@
+{% if trigger.enabled %}
+<button type="button"
+    aria-label="Disable trigger"
+    class="btn btn-sm btn-secondary trigger-toggle"
+    data-url="{% url 'toggleTrigger' trigger.pk %}">
+    Enabled    
+</button>
+{% else %}
+<button type="button"
+    aria-label="Enable trigger"
+    class="btn btn-sm btn-outline-secondary trigger-toggle"
+    data-url="{% url 'toggleTrigger' trigger.pk %}">
+    Disabled    
+</button>
+{% endif %}

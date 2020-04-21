@@ -1,0 +1,69 @@
+<div class="border-bottom pb-1 mb-3">
+    <h1 class="h3 font-weight-normal d-inline">Transaction Triggers</h1>     
+    <div class="btn-toolbar ml-4 d-inline-flex">
+        <button type="button"
+            aria-label="Add an transaction trigger"
+            class="btn btn-sm btn-outline-secondary transaction-trigger-create"
+            data-url="{% url 'transactionTriggerCreate' %}">
+            Add
+        </button>
+    </div>
+</div>
+<div class="table-responsive ">
+  <table class="table table-striped table-bordered table-sm" style="max-width:720px">
+    <thead>
+      <tr>
+        <th class="text-left" colspan="8">Notify when transaction</th>
+        <th class="text-left" colspan="2">Send notification to </th>
+      </tr>
+      <tr>
+        <th class="text-left">account</th>
+        <th class="text-left">credit</th>
+        <th class="text-left">debit</th>
+        <th class="text-left">start</th>
+        <th class="text-left">end</th>
+        <th class="text-left">amount greater than or equal to</th>
+        <th class="text-left">amount less than or equal to</th>
+        <th class="text-left">description</th>
+        <th class="text-left">phone</th>
+        <th class="text-left">email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transaction_trigger in transaction_triggers %}
+      <tr>
+        <td class="text-left">{{ transaction_trigger.account }}</td>
+        <td class="text-left"><span data-feather="{{ transaction_trigger.type_credit|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left"><span data-feather="{{ transaction_trigger.type_debit|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left">{{ transaction_trigger.start }}</td>
+        <td class="text-left">{{ transaction_trigger.end }}</td>
+        <td class="text-left">{{ transaction_trigger.amount_gte }}</td>
+        <td class="text-left">{{ transaction_trigger.amount_lte }}</span></td>
+        <td class="text-left">{{ transaction_trigger.description_value }}</span></td>
+        <td class="text-left"><span data-feather="{{ transaction_trigger.sms|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left"><span data-feather="{{ transaction_trigger.email|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left"> {% include 'onlinebanking/toggle_trigger.html' with trigger=transaction_trigger %} </td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Edit transaction trigger"
+                class="btn btn-sm btn-outline-secondary transaction-trigger-update"
+                data-url="{% url 'transactionTriggerUpdate' transaction_trigger.pk %}">
+                <span data-feather="edit"></span> Edit
+            </button>
+        </td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Delete transaction trigger"
+                class="btn btn-sm btn-outline-danger transaction-trigger-delete"
+                data-url="{% url 'transactionTriggerDelete' transaction_trigger.pk %}"
+                data-replace="transaction-trigger">
+                <span data-feather="trash"></span> Delete
+            </button>
+        </td>
+      </tr> 
+      {% empty %}
+      <tr><td colspan="10">No transaction triggers</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

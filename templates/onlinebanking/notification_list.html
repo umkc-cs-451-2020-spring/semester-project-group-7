@@ -1,0 +1,75 @@
+
+{% extends "onlinebanking/base.html" %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_title %}Notifications{% endblock %}
+
+{% block bootstrap4_content %}
+<div class="border-bottom pb-1 mb-3">
+    <h1 class="h3 font-weight-normal d-inline">Notifications</h1>     
+</div>
+<div class="table-responsive ">
+  <table class="table table-hover table-bordered table-sm" id="notification-table" style="max-width:720px">
+    <thead>
+      <tr>
+        <th class="text-left">Title</th>
+        <th class="text-left">Message</th>
+        <th class="text-left">Triggered</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for notification in notifications %}
+      <tr data-url="{% url 'notificationDetail' notification.pk %}" class="notification-message {{ notification.read|yesno:',font-weight-bold' }}">
+        <td class="text-left">{{ notification.title }}</td>
+        <td class="text-left">{{ notification.message|truncatechars:50 }}</td>
+        <td class="text-left">{{ notification.created|date:'DATETIME_FORMAT' }}</td>
+        </td>
+      </tr> 
+      {% empty %}
+      <tr><td colspan="3">No notifications</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="modal"  role="dialog" id="message-modal">
+
+</div>
+{% endblock %}
+
+{% block bootstrap4_extra_script %}
+<script>
+$(function () {
+
+  /* Functions */
+  var loadMessage = function () {
+    var row = $(this);
+    $.ajax({
+      url: row.attr("data-url"),
+      type: 'get',
+      beforeSend: function () {
+        $("#message-modal").html("");
+        $("#message-modal").modal("show");
+      },
+      success: function (data) {
+        row.removeClass('font-weight-bold');
+        $("#message-modal").html(data);
+        var notification_count = $("#notification-count").text();
+        if( notification_count > 0 ) {
+            $("#notification-count").text(notification_count - 1);
+        }
+
+        if($("#notification-count").text() <= 0) {
+            $("#notification-count").remove();
+        }
+      },
+      error: function (data){
+        console.log('loadForm error', data);
+      },
+    });
+  };
+
+  $("#notification-table").on("click", ".notification-message", loadMessage);
+});
+</script>
+{% endblock %}
