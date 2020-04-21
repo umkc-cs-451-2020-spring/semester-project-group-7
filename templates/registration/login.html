@@ -1,0 +1,21 @@
+{% extends "registration/base.html" %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_title %}Login{% endblock %}
+{% block nav %}
+            <nav class="nav nav-masthead justify-content-center">
+              <a class="nav-link" href="{% url 'register' %}">Activate your online banking account</a>
+            </nav>
+{% endblock %}
+
+{% block content %}     
+        <form class="form-signin text-left" method="post" id="form_login">
+          <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+          {% csrf_token %}
+          {% bootstrap_form form show_label=False %}
+          {% bootstrap_button "Sign in" button_type="submit" button_class="btn-lg btn-secondary btn-block" %}
+          <a href="{% url 'passwordReset' %}">Forgot your password?</a>
+          <p class="mt-5 text-muted">&copy; 2020 Commerce Bancshares, Inc.<br>All rights reserved</p>
+          <p class="mb-3 text-muted">Commerce Bank: Member FDIC.</p>
+       </form>
+{% endblock %}

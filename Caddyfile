@@ -1,0 +1,27 @@
+{
+    email commercebank.umkc@cloud.scottah.com
+}
+
+
+commerce.umkc.scottah.com {
+	@not_static {
+		not {
+			path /static/*
+		}
+	}
+
+	file_server /static/* {
+		root /commercebankapp/
+	}
+
+	reverse_proxy @not_static commercebankapp:8000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+
+
+}
+

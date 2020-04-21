@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% load bootstrap4 %}
+{% load humanize %}
+{% if 'use_i18n'|bootstrap_setting %}
+    {% load i18n %}
+    {% get_current_language as LANGUAGE_CODE %}
+{% endif %}
+<html lang="{{ LANGUAGE_CODE|default:'en_us' }}">
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+    <!-- Page title -->
+    <title>Commerce Bank | {% block bootstrap4_title %}Thank you for using Online Banking.{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    {% bootstrap_css %}
+    <link href="/static/css/bootstrap-commercebank.css" rel="stylesheet">
+    <link href="/static/onlinebanking/css/base.css" rel="stylesheet">
+
+    <!-- Bootstrap JavaScript if it is in head -->
+    {% if 'javascript_in_head'|bootstrap_setting %}
+        {% bootstrap_javascript %}
+    {% endif %}
+
+    {% block bootstrap4_extra_head %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar navbar-light sticky-top bg-light flex-md-nowrap p-0 shadow-sm">
+    <span class="navbar-brand bg-light col-md-2 mr-0 text-center"><img src="/static/img/logo.svg" alt="" id="logo"></span>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <span class="text-muted w-100 pl-3 text-left">
+      Welcome {{ user.first_name}},<br>
+      You last logged in {{ user.last_login|naturaltime }}.
+    </span>
+    <ul class="navbar-nav px-3">
+      <li class="nav-item text-nowrap">
+        <a class="nav-link" href="{% url 'logout' %}">Sign out</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}text-secondary{% endif %}" href="{% url 'dashboard' %}">
+                <span data-feather="home" class="{% if request.resolver_match.url_name == 'dashboard' %}text-secondary{% endif %}"></span>
+                Dashboard {% if request.resolver_match.url_name == 'dashboard' %}<span class="sr-only">(current)</span>{% endif %}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'notificationList' %}text-secondary{% endif %}" href="{% url 'notificationList' %}">
+                <span data-feather="inbox" class="{% if request.resolver_match.url_name == 'notificationList' %}text-secondary{% endif %}"></span>
+                Notifications
+                {% if notification_count > 0 %}
+                <span class="badge badge-primary badge-pill ml-2" id="notification-count">{{ notification_count }}</span>
+                {% endif %} {% if request.resolver_match.url_name == 'notificationList' %}<span class="sr-only">(current)</span>{% endif %}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'trigger' %}text-secondary{% endif %}" href="{% url 'trigger' %}">
+                <span data-feather="bell" class="{% if request.resolver_match.url_name == 'trigger' %}text-secondary{% endif %}"></span>
+                Triggers {% if request.resolver_match.url_name == 'trigger' %}<span class="sr-only">(current)</span>{% endif %}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}text-secondary{% endif %}" href="{% url 'profile' %}">
+                <span data-feather="user" class="{% if request.resolver_match.url_name == 'profile' %}text-secondary{% endif %}"></span>
+                User Profile {% if request.resolver_match.url_name == 'profile' %}<span class="sr-only">(current)</span>{% endif %}
+              </a>
+            </li>
+          </ul>
+          
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Accounts</span>
+            <a class="d-flex align-items-center {% if request.resolver_match.url_name == 'accountCreate' %}text-secondary{% else %}text-muted{% endif %}" href="{% url 'accountCreate' %}" aria-label="Add an Account">
+              <span data-feather="plus-circle"></span>
+            </a>
+          </h6>
+          <ul class="nav flex-column mb-2">
+            {% for acct in accounts %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.resolver_match.kwargs.accountid == acct.account_number %}text-secondary{% endif %}" href="{% url 'listAccountTransaction' acct.account_number %}">
+                    <div>
+                      <span class="{% if request.resolver_match.kwargs.accountid == acct.account_number %}text-secondary{% endif %}" 
+                    {% if acct.account_type|upper == 'SAVINGS' %}
+                       data-feather="dollar-sign">
+                    {% elif acct.account_type|upper  == 'CHECKING' %}
+                      data-feather="list">
+                    {% else %}
+                      data-feather="file-text">
+                    {% endif %}
+                    </span>
+                    {{ acct.account_type }}
+                    {% if request.resolver_match.url_name == 'listAccountTransaction' %}<span class="sr-only">(current)</span>{% endif %}
+                    </div>
+                    <div class='overflow-hidden text-nowrap'>
+                      <span data-feather="corner-down-right" class="invisible"></span>
+                    {{ acct.account_number }} - {% if acct.balance < 0 %}
+                      <span style="color:rgb(196, 0, 0);">-${{ acct.balance|intcomma|slice:"1:" }}
+                    {% else %}
+                      <span>${{ acct.balance|intcomma }}
+                    {% endif %}</span>
+                    </div>
+                  </a>
+                </li>
+            {% empty %}
+                <li class="nav-item nav-link disabled"><span data-feather="x-square"></span>No accounts</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </nav>
+
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-3">
+        {% block bootstrap4_before_content %}{% endblock %}
+        {% block bootstrap4_content %} CONTENT {% endblock %}
+        {% block bootstrap4_after_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript if it is in body -->
+  {% if not 'javascript_in_head'|bootstrap_setting %}
+      {% bootstrap_javascript %}
+  {% endif %}
+
+  <script src="/static/js/feather.min.js"></script>
+  <script>
+    feather.replace()
+  </script>
+  {% block bootstrap4_extra_script %}{% endblock %}
+
+</body>
+
+</html>

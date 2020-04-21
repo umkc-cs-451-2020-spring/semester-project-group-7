@@ -1,0 +1,21 @@
+{% extends "onlinebanking/base.html" %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_title %}{% endblock %}
+
+{% block bootstrap4_content %}
+        <div class="d-flex justify-content-start flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <form class="form-signin text-left" method="post" id="form_login">
+            <h1 class="h3 mb-3 font-weight-normal border-bottom">{{ form_name }}</h1>
+            <div class="text-right w-100">
+                <a href="{% url 'passwordChange' %}">Change password</a>
+            </div>
+            {% csrf_token %}
+            {% bootstrap_form form layout='inline' %}
+            {% bootstrap_button button_text button_type="submit" button_class="btn-lg btn-secondary btn-block" %}
+
+            <p class="mt-5 text-muted">&copy; 2020 Commerce Bancshares, Inc.<br>All rights reserved</p>
+            <p class="mb-3 text-muted">Commerce Bank: Member FDIC.</p>
+        </form>
+       </div>
+{% endblock %}

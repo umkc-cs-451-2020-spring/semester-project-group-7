@@ -1,0 +1,59 @@
+{% extends "onlinebanking/base.html" %}
+{% load bootstrap4 %}
+{% load humanize %}
+
+{% block bootstrap4_title %}Transactions{% endblock %}
+
+{% block bootstrap4_content %}
+    <div class="d-flex justify-content-start flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+      <h1 class="h2">Transactions</h2>
+      <div class="btn-toolbar mb-2 mb-md-0 ml-4">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'addAccountTransaction' accountid %}" aria-label="Add a Transaction">
+          Add
+        </a>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+      <div class="table-responsive ">
+        <table class="table table-striped table-sm" style="max-width:720px">
+          <thead>
+            <tr>
+              <th class="text-left">Posted</th>
+              <th class="text-left w-100">Description</th>
+              <th class="text-right">Amount</th>
+              <th class="text-right">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td class="text-left">{{ transaction.posted|date:"SHORT_DATE_FORMAT" }}</td>
+                <td class="text-left w-100 text-break">{{ transaction.description }}</td>
+                <td class="text-right">
+                  {% if transaction.amount < 0 %}
+                    <span style="color:rgb(196, 0, 0);">-${{ transaction.amount|intcomma|slice:"1:" }}
+                  {% else %}
+                    <span>${{ transaction.amount|intcomma }}
+                  {% endif %}</span>
+                </td>
+                <td class="text-right">
+                  {% if transaction.balance < 0 %}
+                    <span style="color:rgb(196, 0, 0);">-${{ transaction.balance|intcomma|slice:"1:" }}
+                  {% else %}
+                    <span>${{ transaction.balance|intcomma }}
+                  {% endif %}</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td></td>
+              <td>No transactions</td>
+              <td></td>
+              <td></td>
+            </tr>
+            {% endfor %}  
+          </tbody>
+        </table>
+      </div>
+    </div>
+{% endblock %}

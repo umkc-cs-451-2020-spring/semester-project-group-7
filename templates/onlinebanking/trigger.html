@@ -1,0 +1,136 @@
+{% extends "onlinebanking/base.html" %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_title %}Create Triggers{% endblock %}
+
+{% block bootstrap4_content %}
+  <div class="align-items-center pb-2 mb-3 border-bottom" id="user-trigger">  
+    {% include 'onlinebanking/user_trigger_list.html' %}
+  </div>
+
+  <div class="align-items-center pb-2 mb-3 border-bottom" id="account-trigger">  
+    {% include 'onlinebanking/account_trigger_list.html' %}
+  </div>
+
+  <div class="align-items-center pb-2 mb-3 border-bottom" id="transaction-trigger">  
+    {% include 'onlinebanking/transaction_trigger_list.html' %}
+  </div>
+
+  <div class="align-items-center pb-2 mb-3 border-bottom"> 
+    <p class="mt-5 text-muted">&copy; 2020 Commerce Bancshares, Inc.<br>All rights reserved</p>
+    <p class="mb-3 text-muted">Commerce Bank: Member FDIC.</p>
+  </div>
+
+  <div class="modal fade" id="modal">
+    <div class="modal-dialog">
+      <div class="modal-content p-4">
+
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block bootstrap4_extra_script %}
+<script>
+$(function () {
+
+  /* Functions */
+  var loadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      beforeSend: function () {
+        $("#modal .modal-content").html("");
+        $("#modal").modal("show");
+      },
+      success: function (data) {
+        $("#modal .modal-content").html(data);
+      },
+      error: function (data){
+        console.log('loadForm error', data);
+      },
+    });
+  };
+
+  var saveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      success: function (data) {
+          $("#" + form.attr("data-replace")).html(data);
+          feather.replace();
+          $("#modal").modal("hide");
+      },
+      error: function (data){
+        console.log('saveForm error', data);
+        $("#modal .modal-content").html(data.responseText);
+      },
+
+    });
+    return false;
+  };
+
+  var toggleTrigger = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      success: function (data) {
+        btn.replaceWith(data);
+      },
+      error: function (data){
+        console.log('toggleTrigger error', data);
+      },
+    });
+  };
+
+  var deleteTrigger = function (e) {
+    var btn = $(this);
+    if(!btn.attr("data-confirm")) {
+      var btn_html = btn.html();
+      btn.attr("data-confirm", true)
+      btn.addClass('btn-danger');
+      btn.removeClass('btn-outline-danger');
+      btn.text("Confirm");
+      setTimeout(function (){
+        btn.removeClass('btn-danger');
+        btn.addClass('btn-outline-danger');
+        btn.html(btn_html);
+        btn.removeAttr("data-confirm");
+
+      }, 10000);
+    } else {
+      $.ajax({
+        url: btn.attr("data-url"),
+        type: 'get',
+        success: function (data) {
+          $("#" + btn.attr("data-replace")).html(data);
+        },
+        error: function (data){
+          console.log('deleteTrigger error', data);
+        },
+      });
+    }
+  };
+
+  $("#user-trigger").on("click", ".user-trigger-update", loadForm);
+  $("#modal").on("submit", "#user-trigger-form", saveForm);
+  $("#user-trigger").on("click", ".trigger-toggle", toggleTrigger);
+
+  $("#account-trigger").on("click", ".account-trigger-update", loadForm);
+  $("#account-trigger").on("click", ".account-trigger-create", loadForm);
+  $("#account-trigger").on("click", ".account-trigger-delete", deleteTrigger);
+  $("#modal").on("submit", "#account-trigger-form", saveForm);
+  $("#account-trigger").on("click", ".trigger-toggle", toggleTrigger);
+
+  $("#transaction-trigger").on("click", ".transaction-trigger-update", loadForm);
+  $("#transaction-trigger").on("click", ".transaction-trigger-create", loadForm);
+  $("#transaction-trigger").on("click", ".transaction-trigger-delete", deleteTrigger);
+  $("#modal").on("submit", "#transaction-trigger-form", saveForm);
+  $("#transaction-trigger").on("click", ".trigger-toggle", toggleTrigger);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% load bootstrap4 %}
+<h1 class="h3 border-bottom">Update user trigger</h1>
+<form class="text-left" action="{% url 'userTriggerUpdate' %}" method="post" id="user-trigger-form" data-replace="user-trigger">
+    {% csrf_token %}
+    {% bootstrap_form form layout='horizontal' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">&nbsp;</div>
+            <button type="button" class="btn btn-outline-secondary col-2" data-dismiss="modal">Close</button>
+            <div class="col-1">&nbsp;</div>
+            {% bootstrap_button 'Save' button_type="submit" button_class="btn btn-secondary col-3" %}
+        </div>
+    </div>
+</form>
+

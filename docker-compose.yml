@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  mariadb:
+    image: linuxserver/mariadb
+    env_file:
+      - mariadb.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - mariadb:/config
+    expose:
+      - 3306
+    restart: unless-stopped
+
+  commercebankapp:
+    image: commercebankapp:v0
+    env_file:
+      - django.env
+    environment:
+      - DEBUG=True
+    volumes:
+      - static:/app/static
+    expose:
+      - 8000
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:alpine
+    command: caddy run --config /etc/caddy/Caddyfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy:/data/caddy/
+      - ${PWD}/Caddyfile:/etc/caddy/Caddyfile
+      - static:/commercebankapp/static/
+    restart: unless-stopped
+    
+volumes:
+  mariadb:
+  static:
+  caddy:

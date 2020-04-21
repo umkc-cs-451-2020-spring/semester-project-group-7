@@ -1,0 +1,59 @@
+<div class="border-bottom pb-1 mb-3">
+    <h1 class="h3 font-weight-normal d-inline">Account Triggers</h1>     
+    <div class="btn-toolbar ml-4 d-inline-flex">
+        <button type="button"
+            aria-label="Add an account trigger"
+            class="btn btn-sm btn-outline-secondary account-trigger-create"
+            data-url="{% url 'accountTriggerCreate' %}">
+            Add
+        </button>
+    </div>
+</div>
+<div class="table-responsive ">
+  <table class="table table-striped table-bordered table-sm" style="max-width:720px">
+    <thead>
+      <tr>
+        <th class="text-left" colspan="3">Notify when account</th>
+        <th class="text-left" colspan="2">Send notification to </th>
+      </tr>
+      <tr>
+        <th class="text-left">account</th>
+        <th class="text-left">balance greater than or equal to</th>
+        <th class="text-left">balance less than or equal to</th>
+        <th class="text-left">phone</th>
+        <th class="text-left">email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account_trigger in account_triggers %}
+      <tr>
+        <td class="text-left">{{ account_trigger.account }}</td>
+        <td class="text-left">{{ account_trigger.balance_gte }}</td>
+        <td class="text-left">{{ account_trigger.balance_lte }}</span></td>
+        <td class="text-left"><span data-feather="{{ account_trigger.sms|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left"><span data-feather="{{ account_trigger.email|yesno:'check-square,square' }}"></span></td>
+        <td class="text-left"> {% include 'onlinebanking/toggle_trigger.html' with trigger=account_trigger %} </td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Edit account trigger"
+                class="btn btn-sm btn-outline-secondary account-trigger-update"
+                data-url="{% url 'accountTriggerUpdate' account_trigger.pk %}">
+                <span data-feather="edit"></span> Edit
+            </button>
+        </td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Delete account trigger"
+                class="btn btn-sm btn-outline-danger account-trigger-delete"
+                data-url="{% url 'accountTriggerDelete' account_trigger.pk %}"
+                data-replace="account-trigger">
+                <span data-feather="trash"></span> Delete
+            </button>
+        </td>
+      </tr> 
+      {% empty %}
+      <tr><td colspan="6">No account triggers</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

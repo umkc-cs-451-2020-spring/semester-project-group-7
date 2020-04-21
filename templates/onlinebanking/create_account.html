@@ -1,0 +1,16 @@
+{% extends "onlinebanking/base.html" %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_title %}Create a Bank Account{% endblock %}
+
+{% block bootstrap4_content %}     
+        <form class="form-signin text-left" method="post" id="form_login">
+          <h1 class="h3 mb-3 font-weight-normal">Create an Account</h1>
+          {% csrf_token %}
+          {% bootstrap_form form show_label=False %}
+          {% bootstrap_button "Create Account" button_type="submit" button_class="btn-lg btn-secondary btn-block" %}
+
+          <p class="mt-5 text-muted">&copy; 2020 Commerce Bancshares, Inc.<br>All rights reserved</p>
+          <p class="mb-3 text-muted">Commerce Bank: Member FDIC.</p>
+       </form>
+{% endblock %}
