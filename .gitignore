@@ -2,3 +2,5 @@
 *.pyc
 __pycache__
 *.db
+docker-compose.override.yml
+DEV_Caddyfile

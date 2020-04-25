@@ -1,3 +1,4 @@
+
 version: "3.8"
 services:
   mariadb:
@@ -15,11 +16,9 @@ services:
     restart: unless-stopped
 
   commercebankapp:
-    image: commercebankapp:v0
+    image: commercebankapp:latest
     env_file:
       - django.env
-    environment:
-      - DEBUG=True
     volumes:
       - static:/app/static
     expose:

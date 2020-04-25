@@ -71,7 +71,9 @@ TEMPLATES = [
     },
 ]
 
-STATIC_ROOT = '/app/static'
+# STATIC_ROOT = '/app/static'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 WSGI_APPLICATION = 'commercebank.wsgi.application'
 

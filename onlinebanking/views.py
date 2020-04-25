@@ -9,7 +9,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeView as PasswordChangeViewBase
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render
@@ -55,7 +56,7 @@ class TransactionCreateView(LoginRequiredMixin, FormView):
     form_class = TransactionForm
 
     def form_valid(self, form):
-        account = Account.objects.get(account_number=self.kwargs.get('accountid'))
+        account = get_object_or_404(Account, account_number=self.kwargs.get('accountid'), user=self.request.user)
         account.balance += form.instance.amount
 
         decimal_validator = DecimalValidator(DECIMAL_MAX, 2)
@@ -99,7 +100,7 @@ class TransactionListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         accountid = self.kwargs.get('accountid')
         queryset = super(TransactionListView, self).get_queryset()
-        queryset = Transaction.objects.filter(account__account_number=accountid)
+        queryset = Transaction.objects.filter(account__account_number=accountid, account__user=self.request.user)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -213,7 +214,7 @@ class AjaxableResponseMixin:
 
 class ToggleTriggerView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
-        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'))
+        trigger = get_object_or_404(Trigger, Q(pk=self.kwargs.get('pk')) & Q(Q(accounttrigger__user=self.request.user) | Q(transactiontrigger__user=self.request.user) | Q(usertrigger__user=self.request.user)))
         trigger.enabled = not trigger.enabled
         trigger.save()
         return render(self.request, 'onlinebanking/toggle_trigger.html', {
@@ -266,7 +267,7 @@ class AccountTriggerUpdateView(TriggerUpdateView):
     model = AccountTrigger
 
     def get_object(self):
-        return self.model.objects.get(pk=self.kwargs.get('pk'))
+        return self.model.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
 
     def get_success_url(self):
         return reverse('accountTriggerUpdate', kwargs={'pk': self.kwargs.get('pk')})
@@ -299,7 +300,7 @@ class AccountTriggerCreateView(TriggerCreateView):
 
 class AccountTriggerDeleteView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
-        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'))
+        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
         trigger.delete()
         return render(self.request, 'onlinebanking/account_trigger_list.html', {
             'account_triggers': AccountTrigger.objects.filter(user=self.request.user)
@@ -313,7 +314,7 @@ class TransactionTriggerUpdateView(TriggerUpdateView):
     model = TransactionTrigger
 
     def get_object(self):
-        return self.model.objects.get(pk=self.kwargs.get('pk'))
+        return self.model.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
 
     def get_success_url(self):
         return reverse('transactionTriggerUpdate', kwargs={'pk': self.kwargs.get('pk')})
@@ -346,7 +347,7 @@ class TransactionTriggerCreateView(TriggerCreateView):
 
 class TransactionTriggerDeleteView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
-        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'))
+        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
         trigger.delete()
         return render(self.request, 'onlinebanking/transaction_trigger_list.html', {
             'transaction_triggers': TransactionTrigger.objects.filter(user=self.request.user)
@@ -357,6 +358,8 @@ class NotificationDetailView(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         notification = self.get_object()
+        if notification.user != request.user:
+            return HttpResponseNotFound()
         if not notification.read:
             notification.read = make_aware(datetime.now())
             notification.save()
@@ -366,6 +369,12 @@ class NotificationListView(LoginRequiredMixin, ListView):
     model = Notification
     context_object_name = 'notifications'
     template_name = 'onlinebanking/notification_list.html'
+
+
+    def get_queryset(self):
+        queryset = super(NotificationListView, self).get_queryset()
+        queryset = Notification.objects.filter(user=self.request.user)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(NotificationListView, self).get_context_data(**kwargs)
