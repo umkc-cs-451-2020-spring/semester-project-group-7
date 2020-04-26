@@ -300,7 +300,7 @@ class AccountTriggerCreateView(TriggerCreateView):
 
 class AccountTriggerDeleteView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
-        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
+        trigger = Trigger.objects.get(Q(pk=self.kwargs.get('pk')) & Q(Q(accounttrigger__user=self.request.user) | Q(transactiontrigger__user=self.request.user) | Q(usertrigger__user=self.request.user)))
         trigger.delete()
         return render(self.request, 'onlinebanking/account_trigger_list.html', {
             'account_triggers': AccountTrigger.objects.filter(user=self.request.user)
@@ -347,7 +347,7 @@ class TransactionTriggerCreateView(TriggerCreateView):
 
 class TransactionTriggerDeleteView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
-        trigger = Trigger.objects.get(pk=self.kwargs.get('pk'), user=self.request.user)
+        trigger = Trigger.objects.get(Q(pk=self.kwargs.get('pk')) & Q(Q(accounttrigger__user=self.request.user) | Q(transactiontrigger__user=self.request.user) | Q(usertrigger__user=self.request.user)))
         trigger.delete()
         return render(self.request, 'onlinebanking/transaction_trigger_list.html', {
             'transaction_triggers': TransactionTrigger.objects.filter(user=self.request.user)

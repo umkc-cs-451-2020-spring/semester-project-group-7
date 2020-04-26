@@ -112,7 +112,7 @@ class AccountTrigger(Trigger):
     balance_lte = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2, blank=True, null=True)
 
     def clean(self):
-        if not self.balance_gte and not self.balance_gte:
+        if not self.balance_gte and not self.balance_lte:
             raise ValidationError(
                 {'balance_gte': ['Cannot be empty if Less than is empty.'],
                  'balance_lte': ['Cannot be empty if Greater than is empty.']},

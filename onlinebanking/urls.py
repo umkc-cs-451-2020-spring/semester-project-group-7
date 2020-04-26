@@ -5,7 +5,6 @@ from .views import *
 
 urlpatterns = [
     path('', DashboardView.as_view(), name='dashboard'),
-    path('test', DashboardView.as_view(), name='dashboard'),
     path('account/create', AccountCreateView.as_view(), name='accountCreate'),
     path('account/<int:accountid>/transactions/add/', TransactionCreateView.as_view(), name='addAccountTransaction'),
     path('account/<int:accountid>/transactions/', TransactionListView.as_view(), name='listAccountTransaction'),
