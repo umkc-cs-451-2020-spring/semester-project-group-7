@@ -141,7 +141,7 @@ class UserChangeView(LoginRequiredMixin, UpdateView):
     model = User
 
     def form_valid(self, form):
-        form.save()
+        #form.save()
         return super(UpdateView, self).form_valid(form)
 
     def get_object(self):

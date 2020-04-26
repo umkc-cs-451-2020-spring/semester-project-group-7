@@ -34,13 +34,31 @@ class UserAdmin(UserAdminBase):
 class AccountAdmin(admin.ModelAdmin):
     readonly_fields=('last_transaction_number',)
 
+class TransactionAdmin(admin.ModelAdmin):
+    readonly_fields=('posted',)
+
+class TriggerAdmin(admin.ModelAdmin):
+    readonly_fields=('trigger_count',)
+
+class UserTriggerAdmin(admin.ModelAdmin):
+    readonly_fields=('trigger_count',)
+
+class AccountTriggerAdmin(admin.ModelAdmin):
+    readonly_fields=('trigger_count',)
+
+class TransactionTriggerAdmin(admin.ModelAdmin):
+    readonly_fields=('trigger_count',)
+
+class NotificationAdmin(admin.ModelAdmin):
+    readonly_fields=('created',)
+
 admin.site.unregister(Group)
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Account, AccountAdmin)
-admin.site.register(Transaction)
-admin.site.register(Trigger)
-admin.site.register(UserTrigger)
-admin.site.register(AccountTrigger)
-admin.site.register(TransactionTrigger)
-admin.site.register(Notification)
+admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(Trigger, TriggerAdmin)
+admin.site.register(UserTrigger, UserTriggerAdmin)
+admin.site.register(AccountTrigger, AccountTriggerAdmin)
+admin.site.register(TransactionTrigger, TransactionTriggerAdmin)
+admin.site.register(Notification, NotificationAdmin)
