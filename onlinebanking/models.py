@@ -11,7 +11,7 @@ DECIMAL_MAX = 15
 class User(AbstractUser):
     first_name = models.CharField(_('first name'), max_length=150, blank=False)
     last_name = models.CharField(_('last name'), max_length=150, blank=False)
-    email = models.EmailField(_('email address'), blank=False)
+    email = models.EmailField(_('email address'), blank=False, unique=True)
     phone_regex = RegexValidator(regex=r'^\D?([2-9]\d{2})\D?\D?(\d{3})\D?(\d{4})$$', message="Phone number must be entered in the format: '800-555-5555'")
     phone_number = models.CharField(validators=[phone_regex], max_length=14, blank=True)
 

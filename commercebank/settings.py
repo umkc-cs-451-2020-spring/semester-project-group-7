@@ -139,13 +139,15 @@ LOGIN_URL='/login/'
 LOGIN_REDIRECT_URL='/onlinebanking/'
 LOGOUT_REDIRECT_URL='/'
 
-EMAIL_HOST='cloud.scottah.com'
-EMAIL_HOST_USER='commercebank.umkc@cloud.scottah.com'
-EMAIL_HOST_PASSWORD=os.getenv('EMAIL_PASSWD')
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST=os.getenv('SMTP_HOST')
+EMAIL_HOST_USER=os.getenv('EMAIL_USER')
+EMAIL_HOST_PASSWORD=os.getenv('EMAIL_PASS')
+EMAIL_PORT=os.getenv('SMTP_PORT', 587)
+EMAIL_USE_TLS=os.getenv('SMTP_USE_TLS', True)
+EMAIL_USE_SSL=os.getenv('SMTP_USE_SSL', False)
 
-DEFAULT_FROM_EMAIL = "commercebank.umkc@cloud.scottah.com"
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM')
 ADMIN_EMAIL = DEFAULT_FROM_EMAIL
 SUPPORT_EMAIL = DEFAULT_FROM_EMAIL
 DEFAULT_FROM_EMAIL = DEFAULT_FROM_EMAIL
