@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import urls as auth_urls
 from django.urls import include, path
+
 from .views import *
 
 urlpatterns = [
@@ -27,7 +28,7 @@ urlpatterns = [
     path('reset/done/', PasswordResetCompleteView.as_view(), name='passwordResetComplete'),
     path('reset/', PasswordResetView.as_view(), name='passwordReset'),
     path('', include(auth_urls)),
-    path("register/", UserRegistrationdView.as_view(), name='register'),
+    path('register/', UserRegistrationdView.as_view(), name='register'),
     path('onlinebanking/', include('onlinebanking.urls')),
     path('admin/', admin.site.urls),
 ]

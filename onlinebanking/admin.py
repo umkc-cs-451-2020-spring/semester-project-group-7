@@ -13,12 +13,20 @@ from onlinebanking.models import AccountTrigger
 from onlinebanking.models import TransactionTrigger
 from onlinebanking.models import Notification
 
+class CustomModelAdmin(admin.ModelAdmin):
+
+    def __init__(self, model, admin_site):
+        self.list_display = [field.name for field in model._meta.fields]
+        super(CustomModelAdmin, self).__init__(model, admin_site)
+
 class UserCreationForm(UserCreationFormBase):
     class Meta(UserCreationFormBase.Meta):
         model = User
         fields = UserCreationFormBase.Meta.fields + ('email', 'phone_number')
 
 class UserAdmin(UserAdminBase):
+    UserAdminBase.list_display += ('phone_number',)
+
     fieldsets = UserAdminBase.fieldsets
     for fieldset in fieldsets:
         if fieldset[0] == 'Personal info':
@@ -31,25 +39,28 @@ class UserAdmin(UserAdminBase):
 
     search_fields = UserAdminBase.search_fields + ('phone_number',)
 
-class AccountAdmin(admin.ModelAdmin):
+class AccountAdmin(CustomModelAdmin):
+    # list_display = ('account_number', 'account_type', 'user', 'balance')
     readonly_fields=('last_transaction_number',)
 
-class TransactionAdmin(admin.ModelAdmin):
-    readonly_fields=('posted',)
+class TransactionAdmin(CustomModelAdmin):
+    # list_display = ('account', 'transaction_number', 'type', 'amount', 'posted')
+    #readonly_fields=('posted',)
+    pass
 
-class TriggerAdmin(admin.ModelAdmin):
+class TriggerAdmin(CustomModelAdmin):
     readonly_fields=('trigger_count',)
 
-class UserTriggerAdmin(admin.ModelAdmin):
+class UserTriggerAdmin(CustomModelAdmin):
     readonly_fields=('trigger_count',)
 
-class AccountTriggerAdmin(admin.ModelAdmin):
+class AccountTriggerAdmin(CustomModelAdmin):
     readonly_fields=('trigger_count',)
 
-class TransactionTriggerAdmin(admin.ModelAdmin):
+class TransactionTriggerAdmin(CustomModelAdmin):
     readonly_fields=('trigger_count',)
 
-class NotificationAdmin(admin.ModelAdmin):
+class NotificationAdmin(CustomModelAdmin):
     readonly_fields=('created',)
 
 admin.site.unregister(Group)

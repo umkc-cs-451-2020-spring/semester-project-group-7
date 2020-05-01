@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -26,6 +27,10 @@ class User(AbstractUser):
         super(User, self).save(*args, **kwargs)
 
         user_trigger, created = UserTrigger.objects.get_or_create(user=self)
+        if created:
+            user_trigger.name = "User Alert"
+            user_trigger.save()
+            
         if self.phone_number:
             if created:
                 user_trigger.sms = True
@@ -42,7 +47,8 @@ class Account(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     account_number = models.BigIntegerField(primary_key=True)
     last_transaction_number = models.IntegerField(default=10000, editable=False)
-
+    mock_transactions = models.BooleanField(default=False)
+    
     class AccountType(models.TextChoices):
         CHECKING = 'CHECKING', _('Checking')
         SAVINGS = 'SAVINGS', _('Savings')
@@ -58,15 +64,22 @@ class Account(models.Model):
         ordering = ['account_type',]
 
     def __str__(self):
-        return f'[{self.account_type} | {str(self.account_number)}]'
+        return f'{self.account_type} | {str(self.account_number)}'
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     transaction_number = models.IntegerField()
-    posted = models.DateTimeField(auto_now_add=True)
+    posted = models.DateTimeField(default=timezone.now)
     amount = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2)
     description = models.CharField(max_length=100)
     balance = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2, default=Decimal('0.00'), editable=False)
+
+    @property
+    def type(self):
+        if self.amount < 0:
+            return 'DEBIT'
+        else:
+            return 'CREDIT'
 
     class Meta:
         ordering = ['-posted',]
@@ -75,6 +88,7 @@ class Transaction(models.Model):
         return f'{self.account} {self.transaction_number} | {self.amount} - {self.description}'
 
 class Trigger(models.Model):
+    name = models.CharField(max_length=15, blank=True)
     sms = models.BooleanField(default=False)
     email = models.BooleanField(default=True)
     enabled = models.BooleanField(default=True)
@@ -106,7 +120,7 @@ class UserTrigger(Trigger):
 
 class AccountTrigger(Trigger):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL)
 
     balance_gte = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2, blank=True, null=True)
     balance_lte = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2, blank=True, null=True)
@@ -120,7 +134,7 @@ class AccountTrigger(Trigger):
 
 class TransactionTrigger(Trigger):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL)
 
     type_credit = models.BooleanField(default=False)
     type_debit = models.BooleanField(default=False)
@@ -141,8 +155,8 @@ class TransactionTrigger(Trigger):
             )
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created = models.DateTimeField(default=timezone.now)
     triggered_by = models.ForeignKey(Trigger, null=True, on_delete=models.SET_NULL)
     email_sent = models.DateTimeField(blank=True, null=True)
     sms_sent = models.DateTimeField(blank=True, null=True)
@@ -150,3 +164,6 @@ class Notification(models.Model):
     deleted = models.BooleanField(default=False)
     title = models.CharField(max_length=50)
     message = models.TextField()
+
+    class Meta:
+        ordering = ['-created',]

@@ -27,7 +27,7 @@
           <tbody>
             {% for transaction in transactions %}
             <tr>
-                <td class="text-left">{{ transaction.posted|date:"SHORT_DATE_FORMAT" }}</td>
+                <td class="text-left">{{ transaction.posted|date:"SHORT_DATETIME_FORMAT" }}</td>
                 <td class="text-left w-100 text-break">{{ transaction.description }}</td>
                 <td class="text-right">
                   {% if transaction.amount < 0 %}

@@ -5,12 +5,12 @@ from .models import *
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        exclude = ('user', 'balance')
+        exclude = ('user', 'balance', 'mock_transactions')
 
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        exclude = ('transaction_number', 'account')
+        exclude = ('transaction_number', 'account', 'posted')
 
 class TriggerForm(forms.ModelForm):
     class Meta:

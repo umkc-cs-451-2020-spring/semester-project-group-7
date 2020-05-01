@@ -71,8 +71,6 @@ TEMPLATES = [
     },
 ]
 
-# STATIC_ROOT = '/app/static'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 WSGI_APPLICATION = 'commercebank.wsgi.application'
@@ -102,14 +100,27 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
+
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'commercebank.password_validation.NumberValidator',
+    },
+    {
+        'NAME': 'commercebank.password_validation.UppercaseValidator',
+    },
+    {
+        'NAME': 'commercebank.password_validation.LowercaseValidator',
+    },
+    {
+        'NAME': 'commercebank.password_validation.SymbolValidator',
     },
 ]
 
@@ -130,7 +141,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-
+STATIC_ROOT = '/app/static/'
 STATIC_URL = '/static/'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # One month

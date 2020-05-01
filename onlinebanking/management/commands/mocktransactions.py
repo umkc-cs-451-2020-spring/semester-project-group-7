@@ -1,0 +1,105 @@
+import logging
+logger = logging.getLogger(__name__)
+
+import random
+from datetime import datetime as dt
+from datetime import timedelta
+from decimal import *
+
+from django.core.management.base import BaseCommand, CommandError
+from django.utils.timezone import make_aware
+
+from onlinebanking.models import User, Account, Transaction
+
+
+class Command(BaseCommand):
+    help = 'Generate transactions'
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--numdays',
+            nargs='+',
+            type=int,
+        )
+
+    def handle(self, *args, **options):
+        logger.info(f'Generating transactions')
+        transactions = {
+            1: {
+                "Gaming computer": (-2000,-3500),
+                "Washer and dryer": (-1500,-2500),
+                "User car": (-4000,-5500),
+                "Sky diving": (-1000,-1750),
+                "VR Headset": (-1500,-1600),
+                "Bonus": (5000,7000),
+            },
+            10: {
+                "Computer game": (-30, -75),
+                "Candy": (-1, -15),
+                "Olive Garden": (-35, -85),
+                "Paycheck": (2000, 2500),
+                "Ebay sale": (50, 90),
+                "Internet bill": (-50, -50),
+                "Water bill": (-50, -90),
+                "Electricity bill": (-100, 10),
+            },
+            7: {
+                "Paycheck": (1000, 1250),
+            },
+            33: {
+                "Gas": (-15, -45),
+                "Fast food": (-15, -45),
+            },
+            50: {
+                "Groceries": (-50, -150),
+                "Amazon": (-30, -450),
+                "Coffee": (-5, -7),
+            },
+        }
+
+        mock_accounts = Account.objects.filter(mock_transactions=True)
+        numdays = 90  #3 months
+        if options['numdays']:
+            numdays = options['numdays'][0]
+
+        for account in mock_accounts:
+            now = dt.now()
+            logger.info(f'Account: {account}')
+
+            for date in reversed([now - timedelta(days=x) for x in range(numdays)]):
+                date = date.replace(hour=0, minute=0, second=0)
+                num_transactions = random.choices([0,1,2,3,4,5],[0.14, 0.19, 0.44, 0.11, 0.07, 0.05])[0]
+                
+                if not num_transactions:
+                    continue # none today go to next day
+
+                for posted in sorted([make_aware(date + timedelta(minutes=random.randint(0,1440))) for x in range(num_transactions)]):
+
+                    transaction_group = random.choices(list(transactions.values()), [x/100 for x in transactions.keys()])[0]
+                    desc = random.choice(list(transaction_group.keys()))
+                    min_amt, max_amt = sorted(transaction_group[desc])
+                    amount = Decimal(random.randint(min_amt * 100, max_amt * 100) / 100)
+
+                    tmp_bal = account.balance + amount
+                    
+                    if tmp_bal <= -50:
+                        continue # account balance too low
+
+                    account.balance = tmp_bal
+                    account.last_transaction_number += 1
+                    account.save()
+                    Transaction(
+                        account=account,
+                        transaction_number=account.last_transaction_number,
+                        balance=account.balance,
+                        posted=posted,
+                        amount=amount,
+                        description=desc,
+                    ).save()
+
+                    logger.info(
+                        f'\naccount={account}, '
+                        f'transaction_number={account.last_transaction_number}, '
+                        f'posted={posted}, '
+                        f'amount={amount}, '
+                        f'description={desc}, '
+                    )

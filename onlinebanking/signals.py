@@ -1,9 +1,12 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import pytz
 from datetime import datetime as dt
 
+
 from django.core.mail import EmailMessage
+from django.conf import settings
 from django.contrib.auth.signals import user_logged_in
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -84,28 +87,30 @@ def event_account(sender, **kwargs):
         title, message = 'Account balance alert', ''
         if trigger.balance_gte is None:
             if account.balance <= trigger.balance_lte:
-                message = f"{account} balance is less than {trigger.balance_lte}."
+                message = f"{account} balance is less than ${trigger.balance_lte}."
         elif trigger.balance_lte is None:
             if account.balance >= trigger.balance_gte:
-                message = f"{account} balance is greater than {trigger.balance_gte}."
+                message = f"{account} balance is greater than ${trigger.balance_gte}."
         elif trigger.balance_gte == trigger.balance_lte:
             if account.balance == trigger.balance_gte:
-                message = f"{account} balance is {trigger.balance_gte}."
+                message = f"{account} balance is ${trigger.balance_gte}."
         elif trigger.balance_gte < trigger.balance_lte:
             if account.balance >= trigger.balance_gte and \
                account.balance <= trigger.balance_lte:
-                message = f"{account} balance is between {trigger.balance_gte} and {trigger.balance_lte}."
+                message = f"{account} balance is between ${trigger.balance_gte} and ${trigger.balance_lte}."
         else:
             if account.balance >= trigger.balance_gte or \
                account.balance <= trigger.balance_lte:
-                message = f"{account} balance is outside {trigger.balance_lte} and {trigger.balance_gte}."
+                message = f"{account} balance is outside ${trigger.balance_lte} and ${trigger.balance_gte}."
         
         if message:
+            last_transaction = Transaction.objects.get(transaction_number=account.last_transaction_number)
             Notification(
                 user=account.user,
                 title=title,
                 message=message,
-                triggered_by=trigger
+                triggered_by=trigger,
+                created=last_transaction.posted
             ).save()
 
 
@@ -126,60 +131,87 @@ def event_transaction(sender, **kwargs):
             message += 'Credit posted '
             amount = transaction.amount
         else:
-            return
+            continue
 
-        posted_time = transaction.posted.time()
-        if trigger.start is None and trigger.end is None:
-            pass
-        elif trigger.start is None:
-            if posted_time <= trigger.end:
-                message += f"before {trigger.end} "
-        elif trigger.end is None:
-            if posted_time >= trigger.start:
-                message += f"after {trigger.start} "
-        elif trigger.start == trigger.end:
-            if posted_time == trigger.start:
-                message += f"at {trigger.start} "
-        elif trigger.start < trigger.end:
-            logger.info(f"{trigger.start}, {trigger.end}, {transaction.posted}")
-            if posted_time >= trigger.start and \
-              posted_time <= trigger.end:
-                message += f"between {trigger.start} and {trigger.end} "
-        else:
-            if posted_time >= trigger.start or \
-              posted_time <= trigger.end:
-                message += f"not between {trigger.end} and {trigger.start} "
+        local_tz = pytz.timezone(settings.TIME_ZONE)
+        posted = transaction.posted.astimezone(local_tz)
         
+        posted_used = True
+        posted_msg = ''
+        if trigger.start:
+            trigger.start = posted.replace(
+                hour=trigger.start.hour,
+                minute=trigger.start.minute,
+                second=trigger.start.second
+            )
+        if trigger.end:
+            trigger.end = posted.replace(
+                hour=trigger.end.hour,
+                minute=trigger.end.minute,
+                second=trigger.end.second
+            )
+        
+        def _t_str(t):
+            return t.strftime('%I:%M%p %Z')
+        
+        if trigger.start is None and trigger.end is None:
+            posted_used = False
+        elif trigger.start is None:
+            if posted <= trigger.end:
+                posted_msg += f"before {_t_str(trigger.end)} "
+        elif trigger.end is None:
+            if posted >= trigger.start:
+                posted_msg += f"after {_t_str(trigger.start)} "
+        elif trigger.start == trigger.end:
+            if posted == trigger.start:
+                posted_msg += f"at {_t_str(trigger.start)} "
+        elif trigger.start < trigger.end:
+            if posted >= trigger.start and \
+              posted <= trigger.end:
+                posted_msg += f"between {_t_str(trigger.start)} and {_t_str(trigger.end)} "
+        else:
+            if posted >= trigger.start or \
+              posted <= trigger.end:
+                posted_msg += f"not between {_t_str(trigger.end)} and {_t_str(trigger.start)} "
+        
+        amount_used = True
+        amount_msg = ''
         if trigger.amount_gte is None and trigger.amount_lte is None:
-            pass
+            amount_used = False
         elif trigger.amount_gte is None:
             if amount <= trigger.amount_lte:
-                message += f"and the amount is less than {trigger.amount_lte} "
+                amount_msg += f"and the amount is less than ${trigger.amount_lte} "
         elif trigger.amount_lte is None:
             if amount >= trigger.amount_gte:
-                message += f"and the amount is greater than {trigger.amount_gte} "
+                amount_msg += f"and the amount is greater than ${trigger.amount_gte} "
         elif trigger.amount_gte == trigger.amount_lte:
             if amount == trigger.amount_gte:
-                message += f"and the amount is {trigger.amount_gte} "
+                amount_msg += f"and the amount is ${trigger.amount_gte} "
         elif trigger.amount_gte < trigger.amount_lte:
             if amount >= trigger.amount_gte and \
                amount <= trigger.amount_lte:
-                message += f"and the amount is between {trigger.amount_gte} and {trigger.amount_lte} "
+                amount_msg += f"and the amount is between ${trigger.amount_gte} and ${trigger.amount_lte} "
         else:
             if amount >= trigger.amount_gte or \
                amount <= trigger.amount_lte:
-                message += f"and the amount is not between {trigger.amount_lte} and {trigger.amount_gte} "
+                amount_msg += f"and the amount is not between ${trigger.amount_lte} and ${trigger.amount_gte} "
         
+        desc_used = True
+        desc_msg = ''
         if trigger.description_value:
-            if trigger.description_value in transaction.description:
-                message += f"and contains {trigger.description_value} in the description"
+            if trigger.description_value.lower() in transaction.description.lower():
+                desc_msg += f"and contains {trigger.description_value} in the description"
+        else:
+            desc_used = False
 
-        if message:
+        if (posted_used == bool(posted_msg)) and (amount_used == bool(amount_msg)) and (desc_used == bool(desc_msg)):
+            message += posted_msg + amount_msg + desc_msg
             Notification(
                 user=transaction.account.user,
                 title=title,
                 message=message,
-                triggered_by=trigger
+                triggered_by=trigger,
+                created=transaction.posted
             ).save()
 
 @receiver(pre_save, sender=Notification)
@@ -187,10 +219,14 @@ def event_notification(sender, **kwargs):
     notification = kwargs.get('instance', None)
     trigger = notification.triggered_by
     trigger.trigger_count += 1
+    trigger.save()
     if trigger.sms:
-        logger.info("## SEND SMS ############################# ")
-        logger.info(f"## {notification.title}")
-        logger.info(f"## {notification.message}")
+        logger.info(
+            "SMS NOTIFICATION\n"
+            f"## SEND SMS TO {notification.user.phone_number} #################\n"
+            f"## {notification.title}\n"
+            f"## {notification.message}\n"
+        )
         
         notification.sms_sent = make_aware(dt.now())
 

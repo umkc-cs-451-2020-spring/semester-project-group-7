@@ -22,7 +22,7 @@ from .forms import *
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name='onlinebanking/base.html'
+    template_name='onlinebanking/home.html'
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
         context['accounts'] = Account.objects.filter(user=self.request.user)
@@ -72,9 +72,10 @@ class TransactionCreateView(LoginRequiredMixin, FormView):
         form.instance.transaction_number = account.last_transaction_number
 
         form.instance.account = account
-
-        account.save()
+        
         form.save()
+        account.save()
+        
         return super(FormView, self).form_valid(form)
 
     def get_success_url(self):
