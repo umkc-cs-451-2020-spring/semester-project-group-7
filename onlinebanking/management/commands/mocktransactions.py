@@ -8,6 +8,7 @@ from decimal import *
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.timezone import make_aware
+from django.db.models import F
 
 from onlinebanking.models import User, Account, Transaction
 
@@ -22,6 +23,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        pass
         logger.info(f'Generating transactions')
         transactions = {
             1: {
@@ -57,7 +59,7 @@ class Command(BaseCommand):
         }
 
         mock_accounts = Account.objects.filter(mock_transactions=True)
-        numdays = 90  #3 months
+        numdays = 600  #3 months
         if options['numdays']:
             numdays = options['numdays'][0]
 
@@ -84,8 +86,8 @@ class Command(BaseCommand):
                     if tmp_bal <= -50:
                         continue # account balance too low
 
-                    account.balance = tmp_bal
-                    account.last_transaction_number += 1
+                    account.balance = F('balance') + amount
+                    account.last_transaction_number = F('last_transaction_number') + 1
                     account.save()
                     Transaction(
                         account=account,

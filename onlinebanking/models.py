@@ -64,7 +64,7 @@ class Account(models.Model):
         ordering = ['account_type',]
 
     def __str__(self):
-        return f'{self.account_type} | {str(self.account_number)}'
+        return f'{self.account_type} | {str(self.account_number)[:-4]}'
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

@@ -1,5 +1,9 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from decimal import Decimal
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 
 from django.utils.timezone import make_aware
 from django.core.validators import DecimalValidator 
@@ -10,7 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeView as PasswordChangeViewBase
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
-from django.db.models import Q
+from django.db.models import Q, Avg, Count, Min, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render
@@ -24,8 +28,58 @@ from .forms import *
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name='onlinebanking/home.html'
     def get_context_data(self, **kwargs):
+        last_month = make_aware(datetime.today() - timedelta(days=30))
+        last_3_month = make_aware(datetime.today() - timedelta(days=90))
+        last_year = make_aware(datetime.today() - timedelta(days=365.25))
+        
         context = super(DashboardView, self).get_context_data(**kwargs)
-        context['accounts'] = Account.objects.filter(user=self.request.user)
+        
+        triggers = Trigger.objects.filter(Q(
+            Q(accounttrigger__user=self.request.user) | 
+            Q(transactiontrigger__user=self.request.user) | 
+            Q(usertrigger__user=self.request.user))
+        )
+        trig_cnt_month = {}
+        for trigger in triggers:
+            notification_count = Notification.objects.filter(created__gte=last_month, triggered_by=trigger).count()
+            if notification_count > 0:
+                trig_cnt_month[trigger.name] = notification_count
+        context['triggers_month'] = trig_cnt_month
+
+        trig_cnt_year = {}
+        for trigger in triggers:
+            notification_count = Notification.objects.filter(created__gte=last_year, triggered_by=trigger).count()
+            if notification_count > 0:
+                trig_cnt_year[trigger.name] = notification_count
+        context['triggers_year'] = trig_cnt_year
+
+        context['total_triggers'] = Notification.objects.filter(user=self.request.user).count()
+
+        accounts = Account.objects.filter(user=self.request.user)
+
+        x = 12 # 12 months ago
+        now = time.localtime()
+        past_12_mo = sorted([
+            time.localtime(
+                time.mktime(
+                    (now.tm_year, now.tm_mon - n, 1, 0, 0, 0, 0, 0, 0)
+                )
+            )[:2] for n in range(x)
+        ])
+
+        acct_bal_by_month = {}
+        for account in accounts:
+            acct_bal_by_month[account]={}
+            for year, month in past_12_mo:
+                transaction_final = Transaction.objects.filter(account=account, posted__month=month, posted__year=year).first()
+                if transaction_final:
+                    acct_bal_by_month[account][month] = transaction_final.balance
+                else:
+                    acct_bal_by_month[account][month] = 0
+
+        context['past_12_mo'] = [datetime(year=year, month=month, day=1).strftime('%B') for year, month in past_12_mo]
+        context['acct_bal_by_month'] = acct_bal_by_month
+        context['accounts'] = accounts
         context['notification_count'] = Notification.objects.filter(user=self.request.user, read=None).count()
         return context
 

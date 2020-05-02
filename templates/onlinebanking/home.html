@@ -3,31 +3,91 @@
 
 {% block bootstrap4_title %}Dashboard{% endblock %}
 
-{% block bootstrap4_content %}     
-<canvas id="test-chart"></canvas>
-<canvas id="line-chart"></canvas>
+{% block bootstrap4_content %}
+
+    <div class="row justify-content-md-center">
+      <div class="col col-md-10 ">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+          <h3>Triggers activated</h3>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
+              <label class="btn btn-secondary active">
+                <input type="radio" name="trigger_cnt" id="month" autocomplete="off" checked>Past month
+              </label>
+              <label class="btn btn-secondary">
+                <input type="radio" name="trigger_cnt" id="year" autocomplete="off"> Past year
+              </label>
+            </div>
+          </div>
+        </div>
+        <div style="position: relative; height:30vh">
+          <canvas id="trigger_cnt_chart" ></canvas>
+        </div>
+      </div>
+      <div class="col col-lg-2">
+        <div class="card">
+          <div class="card-header">
+            Total times any triggers was activated
+          </div>
+          <div class="card-body text-center">
+            <h1 class="card-text text-muted">{{ total_triggers }}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+
+      <div class="col-md-12">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+          <h3>Account balance for the past 12 months</h3>
+        </div>
+        <div style="position: relative; height:30vh">
+          <canvas id="acct_bal_chart"></canvas>
+        </div>
+        
+      </div>
+
+    </div>
+  
+
+
 {% endblock %}
 
 {% block bootstrap4_extra_script %}
 <script crossorigin="anonymous" integrity="sha384-jTWmCdVdkvOJY6EY4gk75lveTkV5NirjBvWuvUNQpeYQuQQ4zRnM0LyHFFdo7e0D" src="/static/js/Chart.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-cdv6kLsgX340768cH2KIExDwq2unPdQvZHG/ZsQVuo5ulxPrbtRIVRZmGeb1NSYO" src="/static/js/palette.js"></script>
 <script>
-new Chart(document.getElementById("test-chart"), {
-  type: 'horizontalBar',  
+var trigger_month_data = {
+  {% for k,v in triggers_month.items %}
+    "{{ k|safe }}": {{ v }},
+  {% endfor %}
+}
+
+var trigger_year_data = {
+  {% for k,v in triggers_year.items %}
+    "{{ k|safe }}": {{ v }},
+  {% endfor %}
+}
+
+var trigger_cnt_chart = new Chart(document.getElementById("trigger_cnt_chart"), {
+  type: 'bar',  
   data: {
-    labels: ["Africa", "Asia", "Europe", "Latin America", "North America"],
+    labels: Object.keys(trigger_month_data),
     datasets: [
       {
-        label: "Population (millions)",
-        backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
-        data: [2478,5267,734,784,433]
+        data: Object.values(trigger_month_data),
+        backgroundColor: palette('tol-rainbow', Object.keys(trigger_month_data).length).map(function(hex) {
+            return '#' + hex;
+        }),
       }
     ]
   },
   options: {
+    maintainAspectRatio: false,
     legend: { display: false },
     title: {
-      display: true,
-      text: 'Predicted world population (millions) in 2050'
+      display: false,
+      text: 'Triggers activated'
     },
     layout: {      
       padding: {
@@ -37,50 +97,75 @@ new Chart(document.getElementById("test-chart"), {
   }
 });
 
-new Chart(document.getElementById("line-chart"), {
+$(function () {
+  $("input[name=trigger_cnt]").on("click", function(e){
+    if(e.target.id == 'month') {
+      trigger_cnt_chart.data = {
+        labels: Object.keys(trigger_month_data),
+        datasets: [
+          {
+            data: Object.values(trigger_month_data),
+            backgroundColor: palette('tol-rainbow', Object.keys(trigger_month_data).length).map(function(hex) {
+                return '#' + hex;
+            }),
+          }
+        ]
+      }
+    } else if(e.target.id == 'year') {
+      trigger_cnt_chart.data = {
+        labels: Object.keys(trigger_year_data),
+        datasets: [
+          {
+            data: Object.values(trigger_year_data),
+            backgroundColor: palette('tol-rainbow', Object.keys(trigger_year_data).length).map(function(hex) {
+                return '#' + hex;
+            }),
+          }
+        ]
+      }
+    }
+    trigger_cnt_chart.update();
+  });
+});
+
+
+var acct_colors = palette('tol-rainbow', {{ acct_bal_by_month|length }}).map(function(hex) {
+    return '#' + hex;
+});
+var acct_bal_chart = new Chart(document.getElementById("acct_bal_chart"), {
   type: 'line',
   data: {
-    labels: [1500,1600,1700,1750,1800,1850,1900,1950,1999,2050],
-    datasets: [{ 
-        data: [86,114,106,106,107,111,133,221,783,2478],
-        label: "Africa",
-        borderColor: "#3e95cd",
+    labels: ['{{ past_12_mo|join:"','" }}'],
+    
+    datasets: [
+      {% for acct, year in acct_bal_by_month.items %}
+    { 
+        data: [
+          {% for _, month_end_bal in year.items %}
+            {{ month_end_bal }},
+          {% endfor %}
+        ],
+        label: "{{acct.account_type}} | {{acct.account_number|stringformat:'d'|slice:'-4:'}}",
+        borderColor: acct_colors.pop(),
         fill: false
-      }, { 
-        data: [282,350,411,502,635,809,947,1402,3700,5267],
-        label: "Asia",
-        borderColor: "#8e5ea2",
-        fill: false
-      }, { 
-        data: [168,170,178,190,203,276,408,547,675,734],
-        label: "Europe",
-        borderColor: "#3cba9f",
-        fill: false
-      }, { 
-        data: [40,20,10,16,24,38,74,167,508,784],
-        label: "Latin America",
-        borderColor: "#e8c3b9",
-        fill: false
-      }, { 
-        data: [6,3,2,2,7,26,82,172,312,433],
-        label: "North America",
-        borderColor: "#c45850",
-        fill: false
-      }
+      },
+    {% endfor %}
     ]
   },
   options: {
     title: {
-      display: true,
-      text: 'World population per region (in millions)'
+      display: false,
+      text: 'Account balances'
     },
     layout: {
       padding: {
         left: 50,
         right: 50
       }
-    }
+    },
+    maintainAspectRatio: false,
   }
 });
+
 </script>
 {% endblock %}

@@ -18,4 +18,5 @@ from .models import User, Account, Transaction
 
 @periodic_task(run_every=crontab(hour=0))
 def generate_transaction():
-    call_command('mocktransactions', '--numdays=1')
+    pass
+    #call_command('mocktransactions', '--numdays=1')
