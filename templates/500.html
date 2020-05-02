@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+{% load bootstrap4 %}
+{% if 'use_i18n'|bootstrap_setting %}
+    {% load i18n %}
+    {% get_current_language as LANGUAGE_CODE %}
+{% endif %}
+<html lang="{{ LANGUAGE_CODE|default:'en_us' }}">
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
+    <!-- Page title -->
+    <title>Commerce Bank | 500 - Internal Server Error</title>
+
+    <!-- Bootstrap CSS -->
+    {% bootstrap_css %}
+    <link href="/static/css/bootstrap-commercebank.css" rel="stylesheet">
+    <link href="/static/registration/css/base.css" rel="stylesheet">
+    
+    <!-- Bootstrap JavaScript if it is in head -->
+    {% if 'javascript_in_head'|bootstrap_setting %}
+        {% bootstrap_javascript %}
+    {% endif %}
+</head>
+
+<body class="text-center">
+   <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <main role="main" class="inner cover">
+        <header class="masthead mb-auto">
+          <div class="inner">
+            <img class="mb-4" src="/static/img/commerce.png" alt="" width="330">
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link" href="{% url 'home' %}">Login</a>
+            </nav>
+          </div>
+        </header>
+        <h1>Hmm, it seems we're having an issue!</h1>
+        <ul class="text-left d-inline-block">
+            <li>Please try again later</li>
+        </ul>
+      </main>
+
+      <footer class="mastfoot mt-auto">
+        <div class="inner">
+          <p></p>
+        </div>
+      </footer>
+    </div>
+
+<!-- Bootstrap JavaScript if it is in body -->
+{% if not 'javascript_in_head'|bootstrap_setting %}
+    {% bootstrap_javascript %}
+{% endif %}
+
+</body>
+
+</html>
