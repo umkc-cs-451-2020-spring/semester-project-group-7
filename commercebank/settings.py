@@ -34,6 +34,7 @@ ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
 INSTALLED_APPS = [
     'onlinebanking.apps.OnlinebankingConfig',
     'bootstrap4',
+    'preventconcurrentlogins',
     'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'preventconcurrentlogins.middleware.PreventConcurrentLoginsMiddleware',
 ]
 
 ROOT_URLCONF = 'commercebank.urls'
@@ -144,7 +146,8 @@ USE_TZ = True
 STATIC_ROOT = '/app/static/'
 STATIC_URL = '/static/'
 
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # One month
+SESSION_COOKIE_AGE = 60 * 10  # Ten minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True # "sliding" session expiration. This should be enforced on the session side as well.
 
 LOGIN_URL='/login/'
 LOGIN_REDIRECT_URL='/onlinebanking/'

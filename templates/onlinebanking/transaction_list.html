@@ -8,8 +8,11 @@
     <div class="d-flex justify-content-start flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
       <h1 class="h2">Transactions</h2>
       <div class="btn-toolbar mb-2 mb-md-0 ml-4">
-        <a class="btn btn-sm btn-outline-secondary" href="{% url 'addAccountTransaction' accountid %}" aria-label="Add a Transaction">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'addAccountTransaction' pk %}" aria-label="Add a Transaction">
           Add
+        </a>
+        <a class="btn btn-sm btn-outline-secondary ml-1" href="{% url 'exportAccountTransaction' pk %}" target="_blank" aria-label="Add a Transaction">
+          <span data-feather="download"></span> Export
         </a>
       </div>
     </div>

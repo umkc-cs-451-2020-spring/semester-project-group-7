@@ -76,7 +76,7 @@ var trigger_cnt_chart = new Chart(document.getElementById("trigger_cnt_chart"), 
     datasets: [
       {
         data: Object.values(trigger_month_data),
-        backgroundColor: palette('tol-rainbow', Object.keys(trigger_month_data).length).map(function(hex) {
+        backgroundColor: palette('cb-Greens', Object.keys(trigger_month_data).length).map(function(hex) {
             return '#' + hex;
         }),
       }
@@ -105,7 +105,7 @@ $(function () {
         datasets: [
           {
             data: Object.values(trigger_month_data),
-            backgroundColor: palette('tol-rainbow', Object.keys(trigger_month_data).length).map(function(hex) {
+            backgroundColor: palette('cb-Greens', Object.keys(trigger_month_data).length).map(function(hex) {
                 return '#' + hex;
             }),
           }
@@ -117,7 +117,7 @@ $(function () {
         datasets: [
           {
             data: Object.values(trigger_year_data),
-            backgroundColor: palette('tol-rainbow', Object.keys(trigger_year_data).length).map(function(hex) {
+            backgroundColor: palette('cb-Greens', Object.keys(trigger_year_data).length).map(function(hex) {
                 return '#' + hex;
             }),
           }
@@ -145,7 +145,7 @@ var acct_bal_chart = new Chart(document.getElementById("acct_bal_chart"), {
             {{ month_end_bal }},
           {% endfor %}
         ],
-        label: "{{acct.account_type}} | {{acct.account_number|stringformat:'d'|slice:'-4:'}}",
+        label: "{{acct.account_type}} | ****{{acct.account_number|stringformat:'d'|slice:'-4:'}}",
         borderColor: acct_colors.pop(),
         fill: false
       },

@@ -87,9 +87,9 @@
           <ul class="nav flex-column mb-2">
             {% for acct in accounts %}
                 <li class="nav-item">
-                  <a class="nav-link {% if request.resolver_match.kwargs.accountid == acct.account_number %}text-secondary{% endif %}" href="{% url 'listAccountTransaction' acct.account_number %}">
+                  <a class="nav-link {% if request.resolver_match.kwargs.pk == acct.pk %}text-secondary{% endif %}" href="{% url 'listAccountTransaction' acct.pk %}">
                     <div>
-                      <span class="{% if request.resolver_match.kwargs.accountid == acct.account_number %}text-secondary{% endif %}" 
+                      <span class="{% if request.resolver_match.kwargs.pk == acct.pk %}text-secondary{% endif %}" 
                     {% if acct.account_type|upper == 'SAVINGS' %}
                        data-feather="dollar-sign">
                     {% elif acct.account_type|upper  == 'CHECKING' %}
@@ -103,7 +103,7 @@
                     </div>
                     <div class='overflow-hidden text-nowrap'>
                       <span data-feather="corner-down-right" class="invisible"></span>
-                    {{ acct.account_number }} - {% if acct.balance < 0 %}
+                      ****{{acct.account_number|stringformat:'d'|slice:'-4:'}} - {% if acct.balance < 0 %}
                       <span style="color:rgb(196, 0, 0);">-${{ acct.balance|intcomma|slice:"1:" }}
                     {% else %}
                       <span>${{ acct.balance|intcomma }}

@@ -45,7 +45,7 @@ class User(AbstractUser):
 
 class Account(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-    account_number = models.BigIntegerField(primary_key=True)
+    account_number = models.BigIntegerField(unique=True)
     last_transaction_number = models.IntegerField(default=10000, editable=False)
     mock_transactions = models.BooleanField(default=False)
     
@@ -60,11 +60,17 @@ class Account(models.Model):
     )
     balance = models.DecimalField(max_digits=DECIMAL_MAX, decimal_places=2, default=Decimal('0.00'))
 
+    def clean(self):
+        if len(str(self.account_number)) != 8:
+            raise ValidationError(
+                {'account_number': ['Account number is not 8 digits.',]},
+            )
+
     class Meta:
         ordering = ['account_type',]
 
     def __str__(self):
-        return f'{self.account_type} | {str(self.account_number)[:-4]}'
+        return f'{self.account_type} | ****{str(self.account_number)[-4:]}'
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

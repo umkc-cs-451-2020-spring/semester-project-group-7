@@ -1,26 +1,28 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from decimal import Decimal
 import time
+import csv
+from decimal import Decimal
 from datetime import datetime, timedelta
 
-from django.utils.timezone import make_aware
-from django.core.validators import DecimalValidator 
-from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView as PasswordChangeViewBase
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.core.exceptions import ValidationError
+from django.core.validators import DecimalValidator 
 from django.db.models import Q, Avg, Count, Min, Sum
-from django.template.loader import render_to_string
-from django.urls import reverse, reverse_lazy
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView, UpdateView, CreateView
-from django.views.generic import ListView, DetailView
+from django.template.loader import render_to_string
+from django.utils.timezone import make_aware
+from django.urls import reverse, reverse_lazy
+from django.views.generic.base import TemplateView, View
+from django.views.generic.edit import CreateView, FormView, UpdateView
+from django.views.generic import DetailView, ListView
+
 from .models import *
 from .forms import *
 
@@ -110,7 +112,7 @@ class TransactionCreateView(LoginRequiredMixin, FormView):
     form_class = TransactionForm
 
     def form_valid(self, form):
-        account = get_object_or_404(Account, account_number=self.kwargs.get('accountid'), user=self.request.user)
+        account = get_object_or_404(Account, pk=self.kwargs.get('pk'), user=self.request.user)
         account.balance += form.instance.amount
 
         decimal_validator = DecimalValidator(DECIMAL_MAX, 2)
@@ -133,7 +135,7 @@ class TransactionCreateView(LoginRequiredMixin, FormView):
         return super(FormView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('listAccountTransaction', kwargs={'accountid': self.kwargs.get('accountid')})
+        return reverse_lazy('listAccountTransaction', kwargs={'pk': self.kwargs.get('pk')})
 
     def get_form_kwargs(self):
         kwargs = super(TransactionCreateView, self).get_form_kwargs()
@@ -147,20 +149,46 @@ class TransactionCreateView(LoginRequiredMixin, FormView):
         context['button_text'] = 'Add Transaction'
         return context   
 
+class ExportTransactionView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        account_pk = self.kwargs.get('pk')
+        account = Account.objects.get(pk=account_pk)
+        transactions = Transaction.objects.filter(account__pk=account_pk)
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{account.account_type}_{str(account.account_number)[-4:]}_export.csv"'
+
+        
+
+        writer = csv.writer(response)
+        #Posted 	Description 	Amount 	Balance
+        writer.writerow(['Posted', 'Description', 'Amount', 'Type', 'Balance'])
+        for transaction in transactions:
+            writer.writerow([
+                transaction.posted.strftime('%x %X'), 
+                transaction.description,
+                transaction.amount,
+                transaction.type,
+                transaction.balance
+            ])
+
+
+        return response
+
 class TransactionListView(LoginRequiredMixin, ListView):
     model = Transaction
     context_object_name = 'transactions'
     template_name = 'onlinebanking/transaction_list.html'
 
     def get_queryset(self):
-        accountid = self.kwargs.get('accountid')
+        pk = self.kwargs.get('pk')
         queryset = super(TransactionListView, self).get_queryset()
-        queryset = Transaction.objects.filter(account__account_number=accountid, account__user=self.request.user)
+        queryset = Transaction.objects.filter(account__pk=pk, account__user=self.request.user)
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(TransactionListView, self).get_context_data(**kwargs)
-        context['accountid'] = self.kwargs.get('accountid')
+        context['pk'] = self.kwargs.get('pk')
         context['accounts'] = Account.objects.filter(user=self.request.user)
         context['notification_count'] = Notification.objects.filter(user=self.request.user, read=None).count()
         return context

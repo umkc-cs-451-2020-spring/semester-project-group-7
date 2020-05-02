@@ -5,6 +5,7 @@ billiard==3.6.3.0
 celery==4.4.2
 Django==3.0.5
 django-bootstrap4==1.1.1
+django-preventconcurrentlogins==0.8.2
 gunicorn==20.0.4
 kombu==4.6.8
 mysqlclient==1.4.6
