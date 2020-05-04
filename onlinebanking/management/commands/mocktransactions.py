@@ -23,7 +23,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        pass
         logger.info(f'Generating transactions')
         transactions = {
             1: {
@@ -66,6 +65,9 @@ class Command(BaseCommand):
         for account in mock_accounts:
             now = dt.now()
             logger.info(f'Account: {account}')
+            bulk_transactions = []
+            balance = account.balance
+            last_transaction_number = account.last_transaction_number
 
             for date in reversed([now - timedelta(days=x) for x in range(numdays)]):
                 date = date.replace(hour=0, minute=0, second=0)
@@ -81,27 +83,32 @@ class Command(BaseCommand):
                     min_amt, max_amt = sorted(transaction_group[desc])
                     amount = Decimal(random.randint(min_amt * 100, max_amt * 100) / 100)
 
-                    tmp_bal = account.balance + amount
+                    balance = balance + amount
                     
-                    if tmp_bal <= -50:
+                    if balance <= -50:
                         continue # account balance too low
 
-                    account.balance = F('balance') + amount
-                    account.last_transaction_number = F('last_transaction_number') + 1
-                    account.save()
-                    Transaction(
+                    last_transaction_number += 1
+
+                    bulk_transactions.append(Transaction(
                         account=account,
-                        transaction_number=account.last_transaction_number,
-                        balance=account.balance,
+                        transaction_number=last_transaction_number,
+                        balance=balance,
                         posted=posted,
                         amount=amount,
                         description=desc,
-                    ).save()
+                    ))
 
                     logger.info(
                         f'\naccount={account}, '
-                        f'transaction_number={account.last_transaction_number}, '
+                        f'transaction_number={last_transaction_number}, '
+                        f'balance={balance:.2f}, '
                         f'posted={posted}, '
-                        f'amount={amount}, '
+                        f'amount={amount:.2f}, '
                         f'description={desc}, '
                     )
+
+            Transaction.objects.bulk_create(bulk_transactions)
+            account.balance = balance
+            account.last_transaction_number = last_transaction_number
+            account.save()
