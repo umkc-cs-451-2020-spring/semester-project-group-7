@@ -35,6 +35,7 @@ class UserTriggerForm(TriggerForm):
 
     def __init__(self, user, *args, **kwargs):
         super(UserTriggerForm, self).__init__(user, *args, **kwargs)
+        self.fields['name'].initial = "User Activity Alert"
 
 class AccountTriggerForm(TriggerForm):
     class Meta(TriggerForm.Meta):
@@ -43,6 +44,7 @@ class AccountTriggerForm(TriggerForm):
     def __init__(self, user, *args, **kwargs):
         super(AccountTriggerForm, self).__init__(user, *args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(user=user)
+        self.fields['name'].initial = "Account Balance Alert"
 
 class TransactionTriggerForm(TriggerForm):
     class Meta(TriggerForm.Meta):
@@ -51,6 +53,7 @@ class TransactionTriggerForm(TriggerForm):
     def __init__(self, user, *args, **kwargs):
         super(TransactionTriggerForm, self).__init__(user, *args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(user=user)
+        self.fields['name'].initial = "Transaction Alert"
 
 class UserChangeForm(auth_forms.UserChangeForm):
     password = None

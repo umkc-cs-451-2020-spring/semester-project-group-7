@@ -1,5 +1,5 @@
 {% load bootstrap4 %}
-<h1 class="h3 border-bottom">Add transaction trigger</h1>
+<h1 class="h3 border-bottom">Add Transaction Notification Condition</h1>
 <form class="text-left" action="{% url 'transactionTriggerCreate' %}" method="post" id="transaction-trigger-form" data-replace="transaction-trigger">
     {% csrf_token %}
     {% bootstrap_form form layout='horizontal' %}

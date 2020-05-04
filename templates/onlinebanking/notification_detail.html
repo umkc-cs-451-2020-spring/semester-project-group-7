@@ -3,7 +3,7 @@
       <div class="modal-header" >
           <span>
           <h5 class="h5 modal-title">{{notification.title}}</h5>
-          <h6 class="h6 ml-3 text-muted">{{notification.created}}</h6>
+          <h6 class="h6 ml-3 text-muted">{{ notification.triggered_by.name }} - {{notification.created}}</h6>
           </span>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>

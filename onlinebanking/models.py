@@ -28,7 +28,7 @@ class User(AbstractUser):
 
         user_trigger, created = UserTrigger.objects.get_or_create(user=self)
         if created:
-            user_trigger.name = "User Alert"
+            user_trigger.name = "Account Changes Alert"
             user_trigger.save()
             
         if self.phone_number:

@@ -84,7 +84,7 @@ def event_account(sender, **kwargs):
     account = kwargs.get('instance', None)
     triggers = AccountTrigger.objects.filter(user=account.user, account=account, enabled=True)
     for trigger in triggers:
-        title, message = 'Account balance alert', ''
+        title, message = 'Account balance notification', ''
         if trigger.balance_gte is None:
             if account.balance <= trigger.balance_lte:
                 message = f"{account} balance is less than ${trigger.balance_lte}."
@@ -121,7 +121,7 @@ def event_transaction(sender, **kwargs):
     triggers = TransactionTrigger.objects.filter(user=transaction.account.user, account=transaction.account, enabled=True)
 
     for trigger in triggers:
-        title, message = 'Transaction alert', ''
+        title, message = 'Transaction notification', ''
         
         amount = None
         if transaction.amount < 0 and trigger.type_debit:

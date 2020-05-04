@@ -1,8 +1,8 @@
 <div class="border-bottom pb-1 mb-3">
-    <h1 class="h3 font-weight-normal d-inline">Account Triggers</h1>     
+    <h1 class="h3 font-weight-normal d-inline">Account Balance Notifications</h1>     
     <div class="btn-toolbar ml-4 d-inline-flex">
         <button type="button"
-            aria-label="Add an account trigger"
+            aria-label="Add an Account Balance Notification"
             class="btn btn-sm btn-outline-secondary account-trigger-create"
             data-url="{% url 'accountTriggerCreate' %}">
             Add
@@ -55,7 +55,7 @@
         </td>
       </tr> 
       {% empty %}
-      <tr><td colspan="6">No account triggers</td></tr>
+      <tr><td colspan="6">No Account Balance Notifications</td></tr>
       {% endfor %}
     </tbody>
   </table>

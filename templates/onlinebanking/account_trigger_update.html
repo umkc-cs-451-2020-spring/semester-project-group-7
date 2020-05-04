@@ -1,5 +1,5 @@
 {% load bootstrap4 %}
-<h1 class="h3 border-bottom">Update account trigger</h1>
+<h1 class="h3 border-bottom">Update Account Balance Notification</h1>
 <form class="text-left" action="{% url 'accountTriggerUpdate' pk %}" method="post" id="account-trigger-form" data-replace="account-trigger">
     {% csrf_token %}
     {% bootstrap_form form layout='horizontal' %}

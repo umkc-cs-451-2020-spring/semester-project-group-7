@@ -5,3 +5,4 @@ __pycache__
 docker-compose.override.yml
 DEV_Caddyfile
 celerybeat-schedule
+.vscode

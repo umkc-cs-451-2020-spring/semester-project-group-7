@@ -5,10 +5,17 @@
 
 {% block bootstrap4_content %}
 
+    <div class="row ">
+      <div class="col ">
+        <div class="align-items-center pb-2 mb-3 border-bottom" id="user-trigger">  
+          <h3>Dashboard</h3>
+        </div>
+      </div>
+    </div>
     <div class="row justify-content-md-center">
       <div class="col col-md-10 ">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-          <h3>Triggers activated</h3>
+          <h4>Notifications</h4>
           <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
               <label class="btn btn-secondary active">
@@ -27,7 +34,7 @@
       <div class="col col-lg-2">
         <div class="card">
           <div class="card-header">
-            Total times any triggers was activated
+            Total notifications activated
           </div>
           <div class="card-body text-center">
             <h1 class="card-text text-muted">{{ total_triggers }}</h1>
@@ -39,7 +46,7 @@
 
       <div class="col-md-12">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-          <h3>Account balance for the past 12 months</h3>
+          <h4>Account balance for the past 12 months</h4>
         </div>
         <div style="position: relative; height:30vh">
           <canvas id="acct_bal_chart"></canvas>

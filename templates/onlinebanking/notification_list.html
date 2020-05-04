@@ -12,17 +12,19 @@
   <table class="table table-hover table-bordered table-sm" id="notification-table" style="max-width:720px">
     <thead>
       <tr>
-        <th class="text-left">Title</th>
+        <th class="text-left">Type</th>
         <th class="text-left">Message</th>
-        <th class="text-left">Triggered</th>
+        <th class="text-left">Date</th>
+        <th class="text-left">Time</th>
       </tr>
     </thead>
     <tbody>
       {% for notification in notifications %}
       <tr data-url="{% url 'notificationDetail' notification.pk %}" class="notification-message {{ notification.read|yesno:',font-weight-bold' }}">
         <td class="text-left">{{ notification.title }}</td>
-        <td class="text-left">{{ notification.message|truncatechars:50 }}</td>
-        <td class="text-left">{{ notification.created|date:'DATETIME_FORMAT' }}</td>
+        <td class="text-left">{{ notification.triggered_by.name }}: {{ notification.message|truncatechars:50 }}</td>
+        <td class="text-left">{{ notification.created|date:'DATE_FORMAT' }}</td>
+        <td class="text-left">{{ notification.created|date:'TIME_FORMAT' }}</td>
         </td>
       </tr> 
       {% empty %}

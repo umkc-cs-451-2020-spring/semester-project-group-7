@@ -1,5 +1,5 @@
 {% load bootstrap4 %}
-<h1 class="h3 border-bottom">Update user trigger</h1>
+<h1 class="h3 border-bottom">Update User Activity Notification</h1>
 <form class="text-left" action="{% url 'userTriggerUpdate' %}" method="post" id="user-trigger-form" data-replace="user-trigger">
     {% csrf_token %}
     {% bootstrap_form form layout='horizontal' %}

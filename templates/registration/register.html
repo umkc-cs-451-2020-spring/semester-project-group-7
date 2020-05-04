@@ -13,9 +13,36 @@
           <h1 class="h3 mb-3 font-weight-normal">Sign up</h1>
           {% csrf_token %}
           {% bootstrap_form form show_label=False %}
-          {% bootstrap_button "Create your Account" button_type="submit" button_class="btn-lg btn-secondary btn-block" %}
+          {% bootstrap_button "Create Account" button_type="submit" button_class="btn-lg btn-secondary btn-block" %}
 
           <p class="mt-5 text-muted">&copy; 2020 Commerce Bancshares, Inc.<br>All rights reserved</p>
           <p class="mb-3 text-muted">Commerce Bank: Member FDIC.</p>
        </form>
+{% endblock %}
+
+{% block bootstrap4_extra_script %}
+<script>
+/* shhh. tech debt */
+$(function () {
+  $(':input[required]').each(function(i){
+    this.oninvalid=this.setCustomValidity($(this).attr('placeholder') + ' is required!');
+    $(this).attr('placeholder',  '*'+$(this).attr('placeholder'));
+  });
+  $('ul li').slice(0,2).remove();
+  $('ul li').each(function() {
+    var text = $(this).text().replace(', 0-9', '').replace(', A-Z', '').replace(', a-z', '').replace(': ()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?', '.');
+    $(this).text(text);
+  });
+
+  $('#id_password2').siblings().each(function (){
+    var text = $(this).text().replace('Enter the same password as before, for verification.', '').replace("The two password fields didn’t match.", 'Passwords do not match');
+    $(this).text(text);
+  });
+
+  $('#id_username').siblings().last().remove();
+});
+
+
+
+</script>
 {% endblock %}

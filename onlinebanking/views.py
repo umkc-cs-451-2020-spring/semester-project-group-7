@@ -214,7 +214,7 @@ class TransactionTriggerCreateView(LoginRequiredMixin, FormView):
         context = super(TransactionTriggerCreateView, self).get_context_data(**kwargs)
         context['accounts'] = Account.objects.filter(user=self.request.user)
         context['notification_count'] = Notification.objects.filter(user=self.request.user, read=None).count()
-        context['form_name'] = 'Create a Transaction Trigger'
+        context['form_name'] = 'Create a Transaction Notification Trigger'
         context['button_text'] = 'Create Transaction Trigger'
         return context
 

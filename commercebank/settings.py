@@ -260,17 +260,33 @@ logging.config.dictConfig({
         'console': {
             'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
         },
+        'colored_verbose': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': "%(log_color)s%(levelname)-s %(red)s%(module)-s [%(name)-s%(lineno)s] %(reset)s %(blue)s%(message)s"
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'console',
         },
+        'colored_console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'colored_verbose'
+        }
     },
     'loggers': {
         '': {
             'level': LOGLEVEL,
-            'handlers': ['console',],
+            'handlers': ['colored_console',],
         },
+        'gunicorn.access': {
+            'handlers': ['colored_console']
+        },
+        'gunicorn.error': {
+            'handlers': ['colored_console']
+        }
     },
 })
+
