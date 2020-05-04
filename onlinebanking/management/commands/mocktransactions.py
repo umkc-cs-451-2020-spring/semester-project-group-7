@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 import random
 from datetime import datetime as dt
 from datetime import timedelta
+import time
 from decimal import *
 
 from django.core.management.base import BaseCommand, CommandError
@@ -108,7 +109,11 @@ class Command(BaseCommand):
                         f'description={desc}, '
                     )
 
-            Transaction.objects.bulk_create(bulk_transactions)
-            account.balance = balance
-            account.last_transaction_number = last_transaction_number
-            account.save()
+            for trans in bulk_transactions:
+                acct = Account.objects.get(pk=account.pk)
+                acct.last_transaction_number = trans.transaction_number
+                acct.balance = trans.balance
+                acct.save()
+                time.sleep(.04)
+                trans.save()
+                time.sleep(.06)

@@ -94,7 +94,7 @@ class Transaction(models.Model):
         return f'{self.account} {self.transaction_number} | {self.amount} - {self.description}'
 
 class Trigger(models.Model):
-    name = models.CharField(max_length=15, blank=True)
+    name = models.CharField(max_length=60, blank=True)
     sms = models.BooleanField(default=False)
     email = models.BooleanField(default=True)
     enabled = models.BooleanField(default=True)
@@ -163,7 +163,7 @@ class TransactionTrigger(Trigger):
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(default=timezone.now)
-    triggered_by = models.ForeignKey(Trigger, null=True, on_delete=models.SET_NULL)
+    triggered_by = models.ForeignKey(Trigger, null=True, on_delete=models.CASCADE)
     email_sent = models.DateTimeField(blank=True, null=True)
     sms_sent = models.DateTimeField(blank=True, null=True)
     read = models.DateTimeField(blank=True, null=True)
