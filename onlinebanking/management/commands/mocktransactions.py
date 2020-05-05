@@ -59,13 +59,21 @@ class Command(BaseCommand):
         }
 
         mock_accounts = Account.objects.filter(mock_transactions=True)
-        numdays = 600  #3 months
+        numdays = 180  #6 months
         if options['numdays']:
             numdays = options['numdays'][0]
 
         for account in mock_accounts:
             now = dt.now()
             logger.info(f'Account: {account}')
+
+            past = now - timedelta(days=numdays)
+            if Transaction.objects.filter(account=account,posted__gte=make_aware(past)).exists():
+                account.mock_transactions = False
+                account.save()
+                logger.warn("Transactions exist after mock data start date. You about broke something...")
+                continue
+
             bulk_transactions = []
             balance = account.balance
             last_transaction_number = account.last_transaction_number
@@ -117,3 +125,6 @@ class Command(BaseCommand):
                 time.sleep(.04)
                 trans.save()
                 time.sleep(.06)
+
+            acct.mock_transactions = False
+            acct.save()
