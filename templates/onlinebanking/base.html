@@ -135,6 +135,34 @@
   <script>
     feather.replace()
   </script>
+  <script>
+  /*
+    $(function () {
+      function checkLoginRedir(req){
+        var redir = req.getResponseHeader('x-login');
+        if(redir && redir !== ""){
+            window.location.replace(redir);
+            return true;
+        }
+        return false;
+      }
+  */
+      /* Check user pulse. Redirect if session invalid */
+  /*
+      setInterval( function (){
+        $.ajax({
+          url: '/',
+          type: 'get',
+          success: function(data, textStatus, request){
+            if (checkLoginRedir(request)) return;
+          }
+        });
+      }, 10 * 60 * 1000 + 10000); // 10 minutes + 10 seconds
+
+    });
+  */
+
+  </script>
   {% block bootstrap4_extra_script %}{% endblock %}
 
 </body>

@@ -34,6 +34,15 @@
 <script>
 $(function () {
 
+  function checkLoginRedir(req){
+    var redir = req.getResponseHeader('x-login');
+    if(redir && redir !== ""){
+        window.location.replace(redir);
+        return true;
+    }
+    return false;
+  }
+
   /* Functions */
   var loadForm = function () {
     var btn = $(this);
@@ -44,7 +53,8 @@ $(function () {
         $("#modal .modal-content").html("");
         $("#modal").modal("show");
       },
-      success: function (data) {
+      success: function(data, textStatus, request){
+        if (checkLoginRedir(request)) return;
         $("#modal .modal-content").html(data);
       },
       error: function (data){
@@ -59,7 +69,9 @@ $(function () {
       url: form.attr("action"),
       data: form.serialize(),
       type: form.attr("method"),
-      success: function (data) {
+      success: function(data, textStatus, request){
+          if (checkLoginRedir(request)) return;
+        
           $("#" + form.attr("data-replace")).html(data);
           feather.replace();
           $("#modal").modal("hide");
@@ -78,7 +90,8 @@ $(function () {
     $.ajax({
       url: btn.attr("data-url"),
       type: 'get',
-      success: function (data) {
+      success: function(data, textStatus, request){
+        if (checkLoginRedir(request)) return;
         btn.replaceWith(data);
       },
       error: function (data){
@@ -106,7 +119,8 @@ $(function () {
       $.ajax({
         url: btn.attr("data-url"),
         type: 'get',
-        success: function (data) {
+        success: function(data, textStatus, request){
+          if (checkLoginRedir(request)) return;
           $("#" + btn.attr("data-replace")).html(data);
         },
         error: function (data){

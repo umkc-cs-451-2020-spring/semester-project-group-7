@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.template import loader
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
@@ -29,6 +29,11 @@ class LoginView(auth_views.LoginView):
             self.request.session.set_expiry(0)  # if remember me is 
             self.request.session.modified = True
         return super(LoginView, self).form_valid(form)
+
+    def dispatch(self, *args, **kwargs):
+        response = super(LoginView, self).dispatch(*args, **kwargs)
+        response['x-login'] = reverse('login')
+        return response
 
 class UserRegistrationdView(FormView):
     template_name = 'registration/register.html'

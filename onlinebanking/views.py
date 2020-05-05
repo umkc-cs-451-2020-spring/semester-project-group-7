@@ -161,7 +161,6 @@ class ExportTransactionView(LoginRequiredMixin, View):
         
 
         writer = csv.writer(response)
-        #Posted 	Description 	Amount 	Balance
         writer.writerow(['Posted', 'Description', 'Amount', 'Type', 'Balance'])
         for transaction in transactions:
             writer.writerow([

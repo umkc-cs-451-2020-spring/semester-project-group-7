@@ -57,7 +57,15 @@
 {% block bootstrap4_extra_script %}
 <script>
 $(function () {
-
+  function checkLoginRedir(req){
+    var redir = req.getResponseHeader('x-login');
+    if(redir && redir !== ""){
+        window.location.replace(redir);
+        return true;
+    }
+    return false;
+  }
+  
   /* Functions */
   var loadMessage = function () {
     var row = $(this).parent();
@@ -68,7 +76,8 @@ $(function () {
         $("#message-modal").html("");
         $("#message-modal").modal("show");
       },
-      success: function (data) {
+      success: function(data, textStatus, request){
+        if (checkLoginRedir(request)) return;
         $("#message-modal").html(data);
         if(row.hasClass('font-weight-bold')) {
           row.removeClass('font-weight-bold');
@@ -97,7 +106,8 @@ $(function () {
     $.ajax({
       url: $(this).attr("data-url"),
       type: 'get',
-      success: function (data) {
+      success: function(data, textStatus, request){
+        if (checkLoginRedir(request)) return;
         if(row.hasClass('font-weight-bold')) {
           row.removeClass('font-weight-bold');
           
@@ -140,7 +150,8 @@ $(function () {
       $.ajax({
         url: $(this).attr("data-url"),
         type: 'get',
-        success: function (data) {
+        success: function(data, textStatus, request){
+          if (checkLoginRedir(request)) return;
           row.remove();
           var notification_count = $("#notification-count").text();
           if( notification_count > 0 ) {
