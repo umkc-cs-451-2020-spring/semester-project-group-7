@@ -25,6 +25,7 @@ urlpatterns = [
 
     path('notification/', NotificationListView.as_view(), name='notificationList'),
     path('notification/<pk>/', NotificationDetailView.as_view(), name='notificationDetail'),
+    path('notification/<pk>/delete', NotificationDeleteView.as_view(), name='notificationDelete'),
     
     path('profile/', UserChangeView.as_view(), name='profile'),
     path('profile/change_pass', PasswordChangeView.as_view(), name='passwordChange'),

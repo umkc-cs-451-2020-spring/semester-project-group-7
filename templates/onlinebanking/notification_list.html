@@ -21,10 +21,25 @@
     <tbody>
       {% for notification in notifications %}
       <tr data-url="{% url 'notificationDetail' notification.pk %}" class="notification-message {{ notification.read|yesno:',font-weight-bold' }}">
-        <td class="text-left">{{ notification.title }}</td>
-        <td class="text-left">{{ notification.triggered_by.name }}: {{ notification.message|truncatechars:50 }}</td>
-        <td class="text-left">{{ notification.created|date:'DATE_FORMAT' }}</td>
-        <td class="text-left">{{ notification.created|date:'TIME_FORMAT' }}</td>
+        <td class="text-left notification-message-view">{{ notification.title }}</td>
+        <td class="text-left notification-message-view">{{ notification.triggered_by.name }}: {{ notification.message|truncatechars:50 }}</td>
+        <td class="text-left notification-message-view">{{ notification.created|date:'DATE_FORMAT' }}</td>
+        <td class="text-left notification-message-view">{{ notification.created|date:'TIME_FORMAT' }}</td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Mark read"
+                class="btn btn-sm btn-{{ notification.read|yesno:'outline-,' }}secondary notification-read"
+                data-url="{% url 'notificationDetail' notification.pk %}">
+                Mark read
+            </button>
+        </td>
+        <td class="text-center">
+            <button type="button"
+                aria-label="Delete notification"
+                class="btn btn-sm btn-outline-danger notification-delete"
+                data-url="{% url 'notificationDelete' notification.pk %}">
+                <span data-feather="trash"></span> Delete
+            </button>
         </td>
       </tr> 
       {% empty %}
@@ -45,7 +60,7 @@ $(function () {
 
   /* Functions */
   var loadMessage = function () {
-    var row = $(this);
+    var row = $(this).parent();
     $.ajax({
       url: row.attr("data-url"),
       type: 'get',
@@ -54,24 +69,99 @@ $(function () {
         $("#message-modal").modal("show");
       },
       success: function (data) {
-        row.removeClass('font-weight-bold');
         $("#message-modal").html(data);
-        var notification_count = $("#notification-count").text();
-        if( notification_count > 0 ) {
-            $("#notification-count").text(notification_count - 1);
-        }
+        if(row.hasClass('font-weight-bold')) {
+          row.removeClass('font-weight-bold');
+          
+          $(".notification-read", row).addClass('btn-outline-secondary');
+          $(".notification-read", row).removeClass('btn-secondary');
+          
+          var notification_count = $("#notification-count").text();
+          if( notification_count > 0 ) {
+              $("#notification-count").text(notification_count - 1);
+          }
 
-        if($("#notification-count").text() <= 0) {
-            $("#notification-count").remove();
+          if($("#notification-count").text() <= 0) {
+              $("#notification-count").remove();
+          }
         }
       },
       error: function (data){
-        console.log('loadForm error', data);
+        console.log('loadMessage error', data);
       },
     });
   };
 
-  $("#notification-table").on("click", ".notification-message", loadMessage);
+   var readMessage = function () {
+    var row = $(this).parent().parent();
+    $.ajax({
+      url: $(this).attr("data-url"),
+      type: 'get',
+      success: function (data) {
+        if(row.hasClass('font-weight-bold')) {
+          row.removeClass('font-weight-bold');
+          
+          $(".notification-read", row).addClass('btn-outline-secondary');
+          $(".notification-read", row).removeClass('btn-secondary');
+          $("#message-modal").html(data);
+          var notification_count = $("#notification-count").text();
+          if( notification_count > 0 ) {
+              $("#notification-count").text(notification_count - 1);
+          }
+
+          if($("#notification-count").text() <= 0) {
+              $("#notification-count").remove();
+          }
+        }
+      },
+      error: function (data){
+        console.log('readMessage error', data);
+      },
+    });
+  };
+
+  var deleteMessage = function () {
+    var btn = $(this);
+    if(!btn.attr("data-confirm")) {
+      var btn_html = btn.html();
+      btn.attr("data-confirm", true)
+      btn.addClass('btn-danger');
+      btn.removeClass('btn-outline-danger');
+      btn.text("Confirm");
+      setTimeout(function (){
+        btn.removeClass('btn-danger');
+        btn.addClass('btn-outline-danger');
+        btn.html(btn_html);
+        btn.removeAttr("data-confirm");
+
+      }, 10000);
+    } else {
+      var row = $(this).parent().parent();
+      $.ajax({
+        url: $(this).attr("data-url"),
+        type: 'get',
+        success: function (data) {
+          row.remove();
+          var notification_count = $("#notification-count").text();
+          if( notification_count > 0 ) {
+              $("#notification-count").text(notification_count - 1);
+          }
+
+          if($("#notification-count").text() <= 0) {
+              $("#notification-count").remove();
+          }
+        },
+        error: function (data){
+          console.log('deleteMessage error', data);
+        },
+      });
+    }
+  };
+
+  $("#notification-table").on("click", ".notification-message-view", loadMessage);
+  $("#notification-table").on("click", ".notification-read", readMessage);
+  $("#notification-table").on("click", ".notification-delete", deleteMessage);
+  
 });
 </script>
 {% endblock %}

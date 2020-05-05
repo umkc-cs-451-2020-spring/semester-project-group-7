@@ -294,7 +294,6 @@ class AjaxableResponseMixin:
             response = render(self.request, self.success_template_name, self.ajax_context())
         return response
 
-
 class ToggleTriggerView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         trigger = get_object_or_404(Trigger, Q(pk=self.kwargs.get('pk')) & Q(Q(accounttrigger__user=self.request.user) | Q(transactiontrigger__user=self.request.user) | Q(usertrigger__user=self.request.user)))
@@ -436,6 +435,15 @@ class TransactionTriggerDeleteView(LoginRequiredMixin, TemplateView):
             'transaction_triggers': TransactionTrigger.objects.filter(user=self.request.user)
         })
 
+class NotificationDeleteView(LoginRequiredMixin, DetailView):
+    model = Notification
+
+    def get(self, request, *args, **kwargs):
+        notification = self.get_object()
+        notification.deleted = True
+        notification.save()
+        return HttpResponse("deleted", content_type="text/plain")
+
 class NotificationDetailView(LoginRequiredMixin, DetailView):
     model = Notification
 
@@ -456,7 +464,7 @@ class NotificationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super(NotificationListView, self).get_queryset()
-        queryset = Notification.objects.filter(user=self.request.user)
+        queryset = Notification.objects.filter(user=self.request.user, deleted=False)
         return queryset
 
     def get_context_data(self, **kwargs):
