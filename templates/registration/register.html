@@ -25,7 +25,7 @@
 /* shhh. tech debt */
 $(function () {
   $(':input[required]').each(function(i){
-    this.oninvalid=this.setCustomValidity($(this).attr('placeholder') + ' is required!');
+    //this.oninvalid=this.setCustomValidity($(this).attr('placeholder') + ' is required!');
     $(this).attr('placeholder',  '*'+$(this).attr('placeholder'));
   });
   $('ul li').slice(0,2).remove();
